@@ -29,6 +29,14 @@ export class Result<T> implements IResult<T> {
   status: { code: ErrorCode; error: boolean; };
   message?: string;
   result?: T | null
+
+  /**
+   * Get the status code of the result 
+   * @param error Error flag
+   * @param code Error Code
+   * @param message Message to return
+   * @param result Result for operation 
+   */
   constructor(error: boolean, code: ErrorCode, message?: string, result?: T) {
     this.status = {
       code,
@@ -37,6 +45,10 @@ export class Result<T> implements IResult<T> {
     this.message = message;
     this.result = result ?? null
   }
+  /**
+   * Get the status code of the result 
+   * @returns Status Code
+   */
   getStatus(): number {
     switch (this.status.code) {
       case ErrorCode.Success:
@@ -58,10 +70,19 @@ export class Result<T> implements IResult<T> {
     }
   }
 }
+
 export class ResultWithCount<T> extends Result<T> implements WithCount<IResult<T>> {
 
   count: number | null;
 
+  /**
+   * Get the result object
+   * @param error Error flag
+   * @param code Error Code
+   * @param message Message to return
+   * @param result Result for operation 
+   * @param count Count of items in result
+   */
   constructor(error: boolean, code: ErrorCode, message?: string, result?: T, count?: number) {
     super(error, code, message)
     this.status = {

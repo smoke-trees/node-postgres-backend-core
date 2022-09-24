@@ -14,6 +14,11 @@ export class Database {
     return this._ready
   }
 
+  /**
+   * Creates a Database Object 
+   * @param settings Settings Object to be used by the application
+   * @param connect Whether to connect to the database or not
+   */
   constructor(settings: Settings, connect = false,) {
     this.settings = settings
     if (connect) {
@@ -23,11 +28,19 @@ export class Database {
     }
   }
 
+  /**
+   * Add Entity to the Database config
+   * @param entity Entities to be added
+   */
   addEntity(...entity: (Function | string | EntitySchema)[]) {
     if (this.entities instanceof Array) {
       this.entities.push(...entity)
     }
   }
+  /**
+   * Add Migration to the Database config 
+   * @param entity Migrations to be added
+   */
   addMigration(...entity: (Function | string)[]) {
     if (this.migrations instanceof Array) {
       this.migrations.push(...entity)
@@ -46,10 +59,18 @@ export class Database {
     }
   }
 
+  /**
+   * Returns the database connection
+   * @returns Returns the connection name
+   */
   getConnection(): DataSource {
     return this.connection
   }
 
+  /**
+   * Returns the database connection name 
+   * @returns Returns the database config
+   */
   getConfig(): DataSourceOptions {
     const config: DataSourceOptions = {
       type: 'postgres',

@@ -10,6 +10,13 @@ export class Dao<Entity extends BaseEntity> {
   protected database: Database;
   protected entity: EntityTarget<Entity>;
   protected entityName: string;
+  /**
+   * Get a Dao instance
+   * @param database Database Instance
+   * @param entity Entity Constructor
+   * @param name Name of the entity
+   * @returns Dao Instance
+   */
   static getDao<T extends BaseEntity>(database: Database, entity: EntityTarget<T>, name: string) {
     return new this(database, entity, name)
   }
@@ -18,6 +25,12 @@ export class Dao<Entity extends BaseEntity> {
     this.entity = entity
     this.entityName = name
   }
+  /**
+   * Create a new entity 
+   * @param value Value to be inserted
+   * @param manager EntityManager to be used for the operation (optional). Use only for transactions
+   * @returns 
+   */
   async create(value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[], manager?: EntityManager): Promise<IResult<number | string>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
@@ -50,6 +63,12 @@ export class Dao<Entity extends BaseEntity> {
     }
   }
 
+  /**
+   * Read a single entity 
+   * @param value Id of the entity to be read
+   * @param manager EntityManager to be used for the operation (optional). Use only for transactions 
+   * @returns Result with the entity 
+   */
   async read(value: string | number | FindOneOptions<Entity>, manager?: EntityManager): Promise<IResult<Entity>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
@@ -96,8 +115,14 @@ export class Dao<Entity extends BaseEntity> {
     }
   }
 
+  /**
+   * Update a single entity 
+   * @param id Id or the find where options of the entity to be updated
+   * @param values Values to be updated
+   * @param manager EntityManager to be used for the operation (optional). Use only for transactions
+   * @returns Result with the number of rows updated 
+   */
   async update(id: string | number | FindOptionsWhere<Entity>, values: QueryDeepPartialEntity<Entity>, manager?: EntityManager): Promise<IResult<number>> {
-
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -150,6 +175,16 @@ export class Dao<Entity extends BaseEntity> {
     return where
   }
 
+  /**
+   * Read a paginated list of entities 
+   * @param page Page number
+   * @param count Number of entries in a page
+   * @param order Order in which the entries should be returned
+   * @param field Order field
+   * @param where Where condition
+   * @param manager EntityManager to be used for the operation (optional). Use only for transactions
+   * @returns Result with the list of entities
+   */
   async readMany(page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt',
     where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], manager?: EntityManager): Promise<WithCount<IResult<Entity[]>>> {
     if (!manager) {
@@ -193,6 +228,14 @@ export class Dao<Entity extends BaseEntity> {
     }
   }
 
+  /**
+   * Read a paginated list of entities
+   * @param order Order in which the entries should be returned
+   * @param field Order field 
+   * @param where Where condition 
+   * @param manager EntityManager to be used for the operation (optional). Use only for transactions 
+   * @returns 
+   */
   async readManyWithoutPagination(order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt', where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], manager?: EntityManager)
     : Promise<IResult<Entity[]>> {
     if (!manager) {
@@ -240,6 +283,12 @@ export class Dao<Entity extends BaseEntity> {
     }
   }
 
+  /**
+   * Delete entities
+   * @param id Id , ids or Conditions of the entity to be deleted
+   * @param manager EntityManager to be used for the operation (optional). Use only for transactions
+   * @returns 
+   */
   async delete(id: string | number | string[] | FindOptionsWhere<Entity>, manager?: EntityManager): Promise<IResult<number>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()

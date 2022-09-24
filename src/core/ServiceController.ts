@@ -38,6 +38,14 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
   private optionsPath: IServiceControllerPathOptions;
   private EntityConstructor: BaseEntityConstructor<Entity>
 
+  /**
+   * Create a controller for a service which has basic crud routes available 
+   * @param app Application Instance
+   * @param entityConstructor Entity Constructor
+   * @param service Service to be used
+   * @param options Options for the controller
+   * @param localMiddlewares Local middlewares for each path
+   */
   constructor(app: Application, entityConstructor: BaseEntityConstructor<Entity>, service: Service<Entity>, options?: IServiceControllerOptions, localMiddlewares?: ILocalMiddleware) {
     super(app)
     this.service = service

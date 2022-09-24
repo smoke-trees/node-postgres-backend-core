@@ -2,6 +2,7 @@ import { Router as ExpressRouter, Request, Response, NextFunction } from 'expres
 import { Application } from './app'
 import Router from './RouteHandler'
 
+// Methods Supported
 export const enum Methods {
   GET = 'GET',
   POST = 'POST',
@@ -9,6 +10,7 @@ export const enum Methods {
   DELETE = 'DELETE'
 }
 
+// Route Handler
 export interface Route {
   path: string;
   method: Methods;
@@ -16,6 +18,7 @@ export interface Route {
   handler: (req: Request, res: Response, next: NextFunction) => void | Promise<void>;
 }
 
+// Controller Class
 export abstract class Controller extends Router {
   // Router instance for mapping routes
   // The path on which this.routes will be mapped
@@ -27,6 +30,10 @@ export abstract class Controller extends Router {
 
   protected abstract controllers: Controller[];
 
+  /**
+   * Creates a Controller which can be used to map routes 
+   * @param app Application instance
+   */
   constructor (app: Application) {
     super(ExpressRouter())
     this.app = app
@@ -34,11 +41,14 @@ export abstract class Controller extends Router {
     this.loadMiddleware()
   }
 
+  /**
+   * Loads all the routes added to the controller 
+   * @returns Returns the express router
+   */
   public setRoutes = (): ExpressRouter => {
     // Set HTTP method, middleware, and handler for each route
     // Returns Router object, which we will use in Server class
     for (const route of this.routes) {
-      
       switch (route.method) {
         case Methods.GET:
           this.router.get(route.path,...route.localMiddleware, route.handler)

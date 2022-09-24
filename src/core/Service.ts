@@ -5,11 +5,42 @@ import { BaseEntity } from "./BaseEntity";
 import { Dao } from "./Dao";
 
 export interface IService<Entity extends BaseEntity> {
+  /**
+   * Get all entities 
+   * @param id ID of the entity to find
+   */
   readOne(id: number | string): Promise<IResult<Entity>>;
+  /**
+   * Read Many 
+   * @param page Page number to get
+   * @param count Count of items to get
+   * @param order Order to get items in
+   * @param field Order field
+   * @param where where clause
+   */
   readMany(page?: number, count?: number, order?: 'ASC' | 'DESC', field?: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]): Promise<IResult<Entity[] | null>>;
+  /**
+   * Read Many without pagination
+   * @param order Order to get items in
+   * @param field Order field
+   * @param where where clause
+   */
   readManyWithoutPagination(order: 'ASC' | 'DESC', field: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]): Promise<IResult<Entity[] | null>>;
+  /**
+   * Create an entity in database
+   * @param value Value to create
+   */
   create(value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[],): Promise<IResult<string | number | null>>;
+  /**
+   * Update an entity in database 
+   * @param id id, where clause of the entity to update
+   * @param values values to update 
+   */
   update(id: string | number | FindOptionsWhere<Entity>, values: QueryDeepPartialEntity<Entity>): Promise<Result<number | null>>;
+  /**
+   * Delete an entity in database 
+   * @param id id, where clause of the entity to delete
+   */
   delete(id: string | number | string[] | FindOptionsWhere<Entity>): Promise<Result<number | null>>;
 }
 

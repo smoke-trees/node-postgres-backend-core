@@ -6,12 +6,19 @@ export default abstract class Router {
     this.router = router
   }
 
+  /**
+   * Load middleware for the router
+   */
   public loadMiddleware (): void {
     this.mw.forEach((mw) => {
       this.router.use(mw)
     })
   }
 
+  /**
+   * Set the middleware for the router 
+   * @param mw Middleware to add to the router
+   */
   protected setMiddleware (mw?: RequestHandler[]): void {
     this.mw = mw ?? []
   }

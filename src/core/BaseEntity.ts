@@ -4,12 +4,20 @@ export interface BaseEntityConstructor<T> {
   new(data?: any): T;
 }
 
+/**
+ * Create a entity object for a constructor 
+ * @param ctor Constructor of the class
+ * @param data Data to be used to create the object
+ * @returns Entity Object
+ */
 export function createEntity<T>(ctor: BaseEntityConstructor<T>, data: any) {
   return new ctor(data);
 }
 
+/**
+ * @class BaseEntity
+ */
 export class BaseEntity {
-  static entityName: 'BaseEntity';
   id!: string | number;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
