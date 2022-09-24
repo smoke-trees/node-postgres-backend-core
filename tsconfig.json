@@ -16,7 +16,8 @@
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "declaration": true
   },
   "include": [
     "./src",
