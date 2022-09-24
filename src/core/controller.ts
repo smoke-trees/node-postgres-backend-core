@@ -1,5 +1,7 @@
 import { Router as ExpressRouter, Request, Response, NextFunction } from 'express'
 import { Application } from './app'
+import log from './log';
+import { ErrorCode } from './result';
 import Router from './RouteHandler'
 
 // Methods Supported
@@ -7,7 +9,11 @@ export const enum Methods {
   GET = 'GET',
   POST = 'POST',
   PUT = 'PUT',
-  DELETE = 'DELETE'
+  DELETE = 'DELETE',
+  PATCH = 'PATCH',
+  OPTIONS = 'OPTIONS',
+  HEAD = 'HEAD',
+  ALL = 'ALL'
 }
 
 // Route Handler
@@ -24,7 +30,7 @@ export abstract class Controller extends Router {
   // The path on which this.routes will be mapped
   public abstract path: string;
   // Array of objects which implement IRoutes interface
-  protected abstract readonly routes: Array<Route>;
+  private routes: Array<Route>;
 
   protected readonly app: Application;
 
@@ -34,13 +40,31 @@ export abstract class Controller extends Router {
    * Creates a Controller which can be used to map routes 
    * @param app Application instance
    */
-  constructor (app: Application) {
+  constructor(app: Application) {
     super(ExpressRouter())
     this.app = app
     this.setMiddleware()
     this.loadMiddleware()
+    this.routes = []
   }
 
+  addRoutes(...routes: Route[]) {
+    this.routes = [...routes, ...this.routes]
+  }
+
+  private handleException(handler: (req: Request, res: Response, next: NextFunction) => Promise<void> | void) {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        await handler(req, res, next)
+      } catch (error) {
+        log.error("Error in controller", Controller.name, error, {})
+        if (!res.headersSent) {
+          res.status(500).send({ status: { error: true, code: ErrorCode.InternalServerError }, message: "Internal Server Error", result: null })
+        }
+      }
+    }
+
+  }
   /**
    * Loads all the routes added to the controller 
    * @returns Returns the express router
@@ -51,16 +75,28 @@ export abstract class Controller extends Router {
     for (const route of this.routes) {
       switch (route.method) {
         case Methods.GET:
-          this.router.get(route.path,...route.localMiddleware, route.handler)
+          this.router.get(route.path, ...route.localMiddleware, this.handleException(route.handler))
           break
         case Methods.POST:
-          this.router.post(route.path,...route.localMiddleware, route.handler)
+          this.router.post(route.path, ...route.localMiddleware, this.handleException(route.handler))
           break
         case Methods.PUT:
-          this.router.put(route.path,...route.localMiddleware ,route.handler)
+          this.router.put(route.path, ...route.localMiddleware, this.handleException(route.handler))
           break
         case Methods.DELETE:
-          this.router.delete(route.path, ...route.localMiddleware,route.handler)
+          this.router.delete(route.path, ...route.localMiddleware, this.handleException(route.handler))
+          break
+        case Methods.PATCH:
+          this.router.patch(route.path, ...route.localMiddleware, this.handleException(route.handler))
+          break
+        case Methods.HEAD:
+          this.router.head(route.path, ...route.localMiddleware, this.handleException(route.handler))
+          break
+        case Methods.OPTIONS:
+          this.router.options(route.path, ...route.localMiddleware, this.handleException(route.handler))
+          break
+        case Methods.ALL:
+          this.router.all(route.path, ...route.localMiddleware, this.handleException(route.handler))
           break
         default:
         // Throw exception

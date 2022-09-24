@@ -165,5 +165,10 @@ export function ExampleControllerTest(app: Application) {
       assert.equal(result1.body.result.length, 12)
       assert.equal(result1.body.status.code, ErrorCode.Success)
     })
+    it("Exception", async function () {
+      const result1 = await chai.request(app.getApp()).get(`/user/exception`)
+      assert.equal(result1.status, 500)
+      assert.isTrue(result1.body.status.error)
+    })
   })
 }

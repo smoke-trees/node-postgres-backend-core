@@ -33,7 +33,6 @@ export type ILocalMiddleware = {
 }
 
 export abstract class ServiceController<Entity extends BaseEntity> extends Controller {
-  protected routes: Route[];
   public service: Service<Entity>;
   private optionsPath: IServiceControllerPathOptions;
   private EntityConstructor: BaseEntityConstructor<Entity>
@@ -59,9 +58,8 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
       ...options?.paths
     }
     this.EntityConstructor = entityConstructor
-    this.routes = []
     if (this.optionsPath.create) {
-      this.routes.push({
+      this.addRoutes({
         handler: this.create.bind(this),
         localMiddleware: localMiddlewares?.create ?? [],
         method: Methods.POST,
@@ -69,7 +67,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
       })
     }
     if (this.optionsPath.readMany) {
-      this.routes.push({
+      this.addRoutes({
         handler: this.readAll.bind(this),
         localMiddleware: localMiddlewares?.readMany ?? [],
         method: Methods.GET,
@@ -77,7 +75,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
       })
     }
     if (this.optionsPath.read) {
-      this.routes.push({
+      this.addRoutes({
         handler: this.readById.bind(this),
         localMiddleware: localMiddlewares?.read ?? [],
         method: Methods.GET,
@@ -85,7 +83,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
       })
     }
     if (this.optionsPath.update) {
-      this.routes.push({
+      this.addRoutes({
         handler: this.update.bind(this),
         localMiddleware: localMiddlewares?.update ?? [],
         method: Methods.PUT,
@@ -93,7 +91,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
       })
     }
     if (this.optionsPath.delete) {
-      this.routes.push({
+      this.addRoutes({
         handler: this.delete.bind(this),
         localMiddleware: localMiddlewares?.delete ?? [],
         method: Methods.DELETE,
