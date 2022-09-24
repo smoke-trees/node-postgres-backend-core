@@ -1,0 +1,73 @@
+{
+  "name": "@smoke-trees/postgres-backend",
+  "version": "0.0.1",
+  "description": "Postgres Backend Core files",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "npm run lint && tsc",
+    "build-nolint": "tsc",
+    "test": "NODE_OPTIONS=--enable-source-maps mocha --exit --file dist/tests/index.test.js",
+    "test-w": "set NODE_OPTIONS=--enable-source-maps && set CI=true && mocha --exit dist/tests/index.test.js",
+    "watch": "tsc -w",
+    "dev": "NODE_OPTIONS=--enable-source-maps nodemon -L -w ./dist -w ./src -w docs/build/docs.yaml dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smoke-trees/node-postgres-backend-core.git"
+  },
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "express",
+    "postgres"
+  ],
+  "author": "SmokeTrees",
+  "license": "MIT",
+  "homepage": "https://github.com/smoke-trees/node-postgres-backend-core#readme",
+  "eslintConfig": {
+    "rules": {
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "error"
+    }
+  },
+  "standardx": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint/eslint-plugin"
+    ]
+  },
+  "dependencies": {
+    "@smoke-trees/smoke-context": "^1.2.2",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "morgan": "^1.10.0",
+    "pg": "^8.8.0",
+    "typeorm": "0.3.8",
+    "winston": "^3.8.1"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.7.2",
+    "@types/pg": "^8.6.5",
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/mocha": "^9.1.1",
+    "@types/morgan": "^1.9.3",
+    "@typescript-eslint/eslint-plugin": "^5.35.1",
+    "@typescript-eslint/parser": "^5.35.1",
+    "chai": "^4.3.6",
+    "@types/chai": "^4.3.3",
+    "chai-http": "^4.3.0",
+    "eslint": "^8.23.0",
+    "mocha": "^10.0.0",
+    "nodemon": "^2.0.19",
+    "c8": "^7.12.0",
+    "standardx": "^7.0.0",
+    "typescript": "4.7.4"
+  }
+}
