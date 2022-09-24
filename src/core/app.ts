@@ -6,15 +6,18 @@ import RouteHandler from './RouteHandler'
 import Database from './database'
 import { Settings } from './settings'
 
-export  class Application extends RouteHandler {
+export class Application extends RouteHandler {
   private readonly app: ExpressApplication
   private readonly controllers: Controller[];
   protected readonly port: string;
   protected mw: RequestHandler[];
   public settings: Settings;
-  public database: Database;
+  public database: Database | null;
 
-  constructor(settings: Settings = new Settings(), db: Database = new Database(settings, true)) {
+  constructor(settings: Settings);
+  constructor(settings: Settings, database: Database);
+
+  constructor(settings: Settings = new Settings(), db?: Database) {
     const app = express()
     super(app)
     this.app = app
@@ -23,7 +26,7 @@ export  class Application extends RouteHandler {
     this.controllers = []
     this.mw = []
     this.setMiddleware()
-    this.database = db
+    this.database = db ?? null
   }
 
 
