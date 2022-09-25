@@ -1,4 +1,4 @@
-import { CreateDateColumn, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 export interface BaseEntityConstructor<T> {
   new(data?: any): T;
@@ -27,8 +27,7 @@ export class BaseEntity {
   createdAt!: Date;
 
   constructor(data?: any) {
-    Object.assign(this, data);
-    return this
+    Object.assign(this, data || {});
   }
 
   validate(validator: boolean, required: boolean, updatable: boolean): string[] {

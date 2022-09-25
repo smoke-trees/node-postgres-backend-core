@@ -10,4 +10,3 @@ export { Service } from './core/Service'
 export { ServiceController, ILocalMiddleware, IPathsOptions, IServiceControllerOptions, IServiceControllerPathOptions } from './core/ServiceController'
 export { Settings, ISettings  } from './core/settings'
 export { Validator, ValidatorFunction, ValidatorOptions, defaultValidator } from './core/Validator'
-

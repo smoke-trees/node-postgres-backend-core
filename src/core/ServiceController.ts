@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
+import { User } from '../Example/users';
 import { Application } from "./app";
 import { BaseEntity, BaseEntityConstructor, createEntity } from "./BaseEntity";
-import { Controller, Methods, Route } from './controller';
+import { Controller, Methods } from './controller';
+import { DocsRoute, paths, RequestBody } from './documentation/path';
+import { getRef } from './documentation/schema';
+import { Type } from './documentation/types';
 import { ErrorCode, Result } from './result';
 import { Service } from "./Service";
 
@@ -101,6 +105,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
   }
 
 
+
   async readAll(req: Request, res: Response) {
     const { orderBy, order, page, count, nonPaginated, ...filter } = req.query
     let pageNumberParsed = parseInt(page?.toString() ?? '1')
@@ -170,5 +175,38 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
     const { id } = req.params
     const result = await this.service.delete(id)
     res.status(result.getStatus()).json(result)
+  }
+
+  async createDocumentation() {
+    if (this.optionsPath.create) {
+      DocsRoute({
+        path: this.path,
+        method: 'post',
+        operationId: `${this.constructor.name}Create`,
+        summary: `Create a ${this.EntityConstructor.name}`,
+        appendId: false,
+        description: `Create a ${this.EntityConstructor.name}`,
+        requestBody: new RequestBody('', {
+          'application/json': {
+            schema: {
+              $ref: getRef(this.EntityConstructor)
+            }
+          }
+        }),
+        responses: {
+          "200": {
+            description: "Success",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: getRef(User)
+                }
+              }
+            } 
+          }
+        }
+
+      })(this.constructor, 'create')
+    }
   }
 }
