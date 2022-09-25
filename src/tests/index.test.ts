@@ -38,6 +38,6 @@ describe("Test Suite", function () {
   });
   after(function () { });
 
-  // ExampleServiceTest(database, userService)
-  // ExampleControllerTest(app)
+  ExampleServiceTest(database, userService)
+  ExampleControllerTest(app)
 })

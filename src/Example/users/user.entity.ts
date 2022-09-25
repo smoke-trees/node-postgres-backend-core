@@ -17,8 +17,6 @@ export class User extends BaseEntity implements IUser {
   @Documentation.addField({ type: "string", description: "Name of the user" })
   name!: string;
 
-  @Documentation.addField({ type: "object", $ref: Documentation.getRef(Address) })
-  address!: Address;
 
   constructor(it?: Partial<IUser>) {
     super();
