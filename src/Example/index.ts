@@ -3,8 +3,7 @@ import compression from 'compression';
 import express from 'express';
 import { Application } from "../core/app";
 import Database from "../core/database";
-import { GetApiDocumentation, OpenApi } from '../core/documentation/open-api';
-import { paths } from '../core/documentation/path';
+import { Documentation } from '../core/documentation/SmokeDocs';
 import morgan from '../core/morgan';
 import { Settings } from "../core/settings";
 import { User, UserController, UserDao, UserService } from "../Example/users";
@@ -29,24 +28,29 @@ const userController = new UserController(app, userService);
 
 app.addController(userController)
 
+
+
+Documentation.addServers([{
+  url: 'http://localhost:8080',
+  description: 'Local server'
+}])
+
+Documentation.addTags([{
+  name: 'User',
+  description: 'User related endpoints'
+}])
+
+Documentation.addInfo({
+  title: 'Postgres Backend Template',
+  description: 'This is a template for a postgres backend',
+  version: '1.0.0'
+})
+
+console.log(JSON.stringify(Documentation.getAPIJson()))
+
+
+
 app.loadMiddleware()
 app.loadControllers()
-
-OpenApi({
-  servers: [{ url: 'http://localhost:3000', description: 'Local server' }],
-  openapi: '3.0.1',
-  basePath: '/api',
-  info: {
-    description: 'Test',
-    title: 'Test',
-    version: '1.0.1'
-  },
-  tags: [{ name: 'User', description: 'User operations' }],
-})(app)
-
-
-
-console.log(GetApiDocumentation(app))
-
 app.run()
 

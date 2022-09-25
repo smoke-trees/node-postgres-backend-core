@@ -1,24 +1,23 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { BaseEntity } from "../../core/BaseEntity";
-import { DocsField, DocsSchema, getRef, getSchema } from "../../core/documentation/schema";
-import { Format, Type } from "../../core/documentation/types";
+import { Documentation } from "../../core/documentation/SmokeDocs";
 import { Validator } from "../../core/Validator";
 import { Address } from "./address.entity";
 import { IUser } from "./IUser";
 
-@DocsSchema({ type: "object", description: "User entity" })
+@Documentation.addSchema({ type: "object", description: "User entity" })
 @Entity({ name: 'user_test_table' })
 export class User extends BaseEntity implements IUser {
   @PrimaryGeneratedColumn('increment', { name: 'id' })
-  @DocsField({ type: "number", format: "int32", description: "User id" })
+  @Documentation.addField({ type: "number", format: "int32", description: "User id" })
   id!: number;
 
   @Column('varchar', { name: 'name_user', length: 255 })
   @Validator({ required: true, updatable: true })
-  @DocsField({ type: "string", description: "Name of the user" })
+  @Documentation.addField({ type: "string", description: "Name of the user" })
   name!: string;
 
-  @DocsField({ type: "object", $ref: getRef(Address) })
+  @Documentation.addField({ type: "object", $ref: Documentation.getRef(Address) })
   address!: Address;
 
   constructor(it?: Partial<IUser>) {

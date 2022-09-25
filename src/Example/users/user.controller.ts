@@ -9,7 +9,7 @@ import { User } from "./user.entity";
 import { UserService } from "./user.service";
 
 export class UserController extends ServiceController<User>  {
-  public path: string = '/user'
+  public path = '/user';
   protected controllers: Controller[];
   protected mw: RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>[];
   public service: UserService;
@@ -24,6 +24,7 @@ export class UserController extends ServiceController<User>  {
       localMiddleware: [],
       method: Methods.GET
     })
+    this.loadDocumentation()
   }
 
   exception() {

@@ -1,13 +1,22 @@
+import { Methods } from "../controller";
 import { ExternalDocumentation, SchemaObject } from "./schema";
+
+export type IRequestParameter = {
+  in: 'query' | 'header' | 'path' | 'cookie';
+  name: string;
+  description?: string;
+  required?: boolean
+  schema?: SchemaObject;
+}
 
 export class RequestParameters {
   in: 'query' | 'header' | 'path' | 'cookie';
   constructor(
     public name: string,
     In: 'query' | 'header' | 'path' | 'cookie',
-    public description: string,
-    public required: boolean,
-    public schema: SchemaObject,
+    public description?: string,
+    public required?: boolean,
+    public schema?: SchemaObject,
   ) {
     this.in = In
   }
@@ -15,31 +24,28 @@ export class RequestParameters {
 
 export class RequestBody {
   constructor(
-    public description: string,
     public content: {
       [key: string]: {
-        schema: SchemaObject
+        schema: SchemaObject | undefined
       }
-    }
+    },
+    public description?: string,
   ) {
   }
 }
 
-export class ResponseObject {
-  constructor(
-    public description: string,
-    public content: {
-      [key: string]: {
-        schema: SchemaObject
-      }
-    },
-    public headers?: {
-      [key: string]: {
-        description: string;
-        schema: SchemaObject
-      }
+export interface IResponseObject {
+  content: {
+    [key: string]: {
+      schema: SchemaObject
     }
-  ) {
+  }
+  description?: string,
+  headers?: {
+    [key: string]: {
+      description: string;
+      schema: SchemaObject
+    }
   }
 }
 
@@ -50,9 +56,9 @@ export interface Operation {
   description?: string;
   externalDocs?: ExternalDocumentation;
   operationId: string;
-  parameters?: any[];
+  parameters?: IRequestParameter[];
   requestBody?: RequestBody;
-  responses?: { [key: string]: ResponseObject };
+  responses?: { [key: string]: IResponseObject };
 }
 
 export interface Path {
@@ -68,59 +74,4 @@ export interface Path {
   patch?: Operation;
 }
 
-export type Paths = {
-  [key: string]: Path;
-}
-
-export const paths: Paths = {}
-
-
-export function DocsRoute({
-  path,
-  method,
-  summary,
-  description,
-  operationId,
-  tags,
-  parameters,
-  requestBody,
-  responses,
-  externalDocs,
-  appendId,
-  basePath
-}: {
-  path?: string;
-  method: 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
-  summary?: string;
-  description?: string;
-  operationId: string;
-  tags?: string[];
-  parameters?: RequestParameters[];
-  requestBody?: RequestBody;
-  basePath?: string;
-  appendId?: boolean;
-  responses?: {
-    [key: string]: ResponseObject
-  };
-  externalDocs?: ExternalDocumentation;
-}) {
-  return (target: any, propertyKey: string ) => {
-    if (!path) {
-      const obj = new target.constructor()
-      path = `${target.path}${appendId ? '/{id}' : ''}`
-    }
-    if (!paths[path]) {
-      paths[path] = {}
-    }
-    paths[path][method] = {
-      summary,
-      description,
-      operationId,
-      tags,
-      parameters,
-      requestBody,
-      responses,
-      externalDocs,
-    }
-  }
-}
+export type Paths = Partial<Record<Methods, Operation | undefined>>

@@ -1,3 +1,5 @@
+import { Documentation } from "./documentation/SmokeDocs";
+
 export enum ErrorCode {
   Success = '200',
   Created = '201',
@@ -25,11 +27,11 @@ export interface IResult<T> {
 
 export type WithCount<T> = T & { count: number | null }
 
+
 export class Result<T> implements IResult<T> {
   status: { code: ErrorCode; error: boolean; };
   message?: string;
   result?: T | null
-
   /**
    * Get the status code of the result 
    * @param error Error flag

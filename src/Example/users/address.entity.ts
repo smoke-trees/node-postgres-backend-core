@@ -1,19 +1,19 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { BaseEntity } from "../../core/BaseEntity";
-import { DocsField, DocsSchema } from "../../core/documentation/schema";
+import { Documentation } from "../../core/documentation/SmokeDocs";
 import { Validator } from "../../core/Validator";
 import { IUser } from "./IUser";
 
-@DocsSchema({ type: "object", description: "Address Entity" })
+@Documentation.addSchema({ type: 'object' })
 @Entity({ name: 'address' })
 export class Address extends BaseEntity implements IUser {
   @PrimaryGeneratedColumn('increment', { name: 'id' })
-  @DocsField({ type: "number", format: "int32", description: "Address" })
+  @Documentation.addField({ type: "number", format: "int32", description: "Address" })
   id!: number;
 
   @Column('varchar', { name: 'name_user', length: 255 })
   @Validator({ required: true, updatable: true })
-  @DocsField({ type: "string", description: "Name of the address" })
+  @Documentation.addField({ type: "string", description: "Name of the address" })
   name!: string;
 
   constructor(it?: Partial<IUser>) {

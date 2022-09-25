@@ -6,14 +6,14 @@ import Router from './RouteHandler'
 
 // Methods Supported
 export const enum Methods {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
-  DELETE = 'DELETE',
-  PATCH = 'PATCH',
-  OPTIONS = 'OPTIONS',
-  HEAD = 'HEAD',
-  ALL = 'ALL'
+  GET = 'get',
+  POST = 'post',
+  PUT = 'put',
+  DELETE = 'delete',
+  PATCH = 'patch',
+  OPTIONS = 'options',
+  HEAD = 'head',
+  ALL = 'all'
 }
 
 // Route Handler

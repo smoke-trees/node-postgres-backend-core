@@ -1,11 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { User } from '../Example/users';
+import { User, UserService } from '../Example/users';
 import { Application } from "./app";
 import { BaseEntity, BaseEntityConstructor, createEntity } from "./BaseEntity";
 import { Controller, Methods } from './controller';
-import { DocsRoute, paths, RequestBody } from './documentation/path';
-import { getRef } from './documentation/schema';
-import { Type } from './documentation/types';
+import { Documentation } from './documentation/SmokeDocs';
 import { ErrorCode, Result } from './result';
 import { Service } from "./Service";
 
@@ -104,8 +102,6 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
     }
   }
 
-
-
   async readAll(req: Request, res: Response) {
     const { orderBy, order, page, count, nonPaginated, ...filter } = req.query
     let pageNumberParsed = parseInt(page?.toString() ?? '1')
@@ -177,36 +173,111 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
     res.status(result.getStatus()).json(result)
   }
 
-  async createDocumentation() {
+  async loadDocumentation() {
     if (this.optionsPath.create) {
-      DocsRoute({
-        path: this.path,
-        method: 'post',
-        operationId: `${this.constructor.name}Create`,
-        summary: `Create a ${this.EntityConstructor.name}`,
-        appendId: false,
-        description: `Create a ${this.EntityConstructor.name}`,
-        requestBody: new RequestBody('', {
-          'application/json': {
-            schema: {
-              $ref: getRef(this.EntityConstructor)
-            }
-          }
-        }),
+      Documentation.addRoute({
+        description: 'Create a new entity',
+        tags: [this.EntityConstructor.name],
+        method: Methods.POST,
+        path: `${this.path}`,
+        requestBody: {
+          $ref: Documentation.getRef(this.EntityConstructor)
+        },
+        responses: {
+          "201": {
+            description: "Created",
+            value: { anyOf: [{ type: 'string', format: 'uuid' }, { type: 'integer' }] }
+          },
+          "400": {
+            description: "Bad Request",
+            value: { $ref: Documentation.getRef(this.EntityConstructor) }
+          },
+        }
+      })(this.EntityConstructor)
+    }
+    if (this.optionsPath.readMany) {
+      Documentation.addRoute({
+        description: 'Read many entities',
+        parameters: [
+          { name: 'orderBy', in: 'query', description: 'Order by which field', schema: { type: 'string' } },
+          { name: 'order', in: 'query', description: 'Order: ASC or DESC', schema: { type: 'string' } },
+          { name: 'page', in: 'query', description: 'Page number', schema: { type: 'integer', minimum: 1, default: 1 } },
+          { name: 'count', in: 'query', description: 'Order by', schema: { type: 'integer', minimum: 1, default: 10 } },
+        ],
+        method: Methods.GET,
+        path: `${this.path}`,
+        tags: [this.EntityConstructor.name],
         responses: {
           "200": {
-            description: "Success",
-            content: {
-              "application/json": {
-                schema: {
-                  $ref: getRef(User)
-                }
-              }
-            } 
+            description: "OK",
+            value: { $ref: Documentation.getRef(this.EntityConstructor) }
           }
         }
-
-      })(this.constructor, 'create')
+      })(this.EntityConstructor)
+    }
+    if (this.optionsPath.read) {
+      Documentation.addRoute({
+        description: 'Read many entities',
+        parameters: [
+          { name: 'id', in: 'path', required: true, description: 'Id to read', schema: { type: 'string' } },
+        ],
+        tags: [this.EntityConstructor.name],
+        method: Methods.GET,
+        path: `${this.path}/{id}`,
+        responses: {
+          "200": {
+            description: "OK",
+            value: { $ref: Documentation.getRef(this.EntityConstructor) }
+          },
+          "404": {
+            description: "Not found",
+            value: { type: 'object', example: null }
+          }
+        }
+      })(this.EntityConstructor)
+    }
+    if (this.optionsPath.update) {
+      Documentation.addRoute({
+        description: 'Update an entity',
+        tags: [this.EntityConstructor.name],
+        parameters: [
+          { name: 'id', in: 'path', required: true, description: 'Id to read', schema: { type: 'string' } },
+        ],
+        requestBody: { $ref: Documentation.getRef(this.EntityConstructor) },
+        method: Methods.PUT,
+        path: `${this.path}/{id}`,
+        responses: {
+          "200": {
+            description: "OK",
+            value: { type: 'integer', description: "Count of object updated" }
+          },
+          "404": {
+            description: "Not found",
+            value: { type: 'object', example: null }
+          }
+        }
+      })(this.EntityConstructor)
+    }
+    if (this.optionsPath.delete) {
+      Documentation.addRoute({
+        description: 'Delete an entity',
+        tags: [this.EntityConstructor.name],
+        parameters: [
+          { name: 'id', in: 'path', required: true, description: 'Id to read', schema: { type: 'string' } },
+        ],
+        method: Methods.DELETE,
+        path: `${this.path}/{id}`,
+        responses: {
+          "200": {
+            description: "OK",
+            value: { type: 'integer', description: "Count of objects deleted" }
+          },
+          "404": {
+            description: "Not found",
+            value: { type: 'object', example: null }
+          }
+        }
+      })(this.EntityConstructor)
     }
   }
 }

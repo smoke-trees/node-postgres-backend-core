@@ -1,6 +1,5 @@
-import 'reflect-metadata'
-import { paths } from './path';
-import { ExternalDocumentation, Schemas } from "./schema";
+import 'reflect-metadata';
+import { ExternalDocumentation } from "./schema";
 
 export interface IContact {
   name?: string;
@@ -22,7 +21,7 @@ export interface IInfoObject {
   version?: string;
 }
 
-export interface Tags {
+export interface Tag {
   name: string;
   description?: string;
   externalDocs?: ExternalDocumentation
@@ -39,30 +38,3 @@ export interface ServerObject {
   variables?: ServerVariableObject[];
 }
 
-let documentation: any = {}
-
-export function OpenApi({ openapi = '3.0.1', info,
-  servers, tags, basePath = '/' }:
-  {
-    openapi: string, info?: IInfoObject, tags?: Tags[], servers?: ServerObject[],
-    externalDocs?: ExternalDocumentation, security?: any[], basePath?: string
-  }) {
-  const schemas = Reflect.getMetadata(`smoke-docs:schemas`, Schemas)
-  console.log('openapi', schemas)
-  return function (target: any) {
-    documentation = {
-      openapi,
-      info,
-      tags,
-      servers,
-      components: {
-        schemas
-      },
-      paths
-    }
-    Reflect.defineMetadata(`smoke-docs:openapi`, documentation, target)
-  }
-}
-export function GetApiDocumentation(target: any) {
-  return JSON.stringify(Reflect.getMetadata(`smoke-docs:openapi`, target))
-}
