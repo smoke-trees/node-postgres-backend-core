@@ -70,7 +70,6 @@ export abstract class Controller extends Router {
    * @returns Returns the express router
    */
   public setRoutes = (): ExpressRouter => {
-    this.createDocumentation()
     // Set HTTP method, middleware, and handler for each route
     // Returns Router object, which we will use in Server class
     for (const route of this.routes) {
@@ -110,5 +109,5 @@ export abstract class Controller extends Router {
     // Return router instance (will be usable in Server class)
     return this.router
   };
-  public createDocumentation() { }
+  // public abstract loadDocumentation(): void;
 }
