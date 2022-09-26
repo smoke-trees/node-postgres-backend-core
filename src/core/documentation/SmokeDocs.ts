@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Methods } from "../controller";
 import { IInfoObject, ServerObject, Tag } from "./open-api";
 import { IRequestParameter, IResponseObject, Path, Paths, RequestBody } from "./path";
@@ -28,10 +29,9 @@ export class SmokeDocs {
 
   addSchema(data: Partial<SchemaObject>) {
     return (target: Function) => {
-      console.log(target.name)
-      let schema = this.schemas[target.name] ?? {} as SchemaObject;
-      schema = { ...schema, ...data }
-      this.schemas[target.name] = schema;
+      let schema = Reflect.getMetadata('smoke:schema', target) ?? {} as SchemaObject;
+      const copy = { ...schema, ...data }
+      this.schemas[target.name] = copy;
       this.refs[target.name] = `#/components/schemas/${target.name}`;
     }
   }
@@ -39,10 +39,11 @@ export class SmokeDocs {
 
   public addField(data: SchemaObject) {
     return (target: Object, propertyKey: string) => {
-      let schema = this.schemas[target.constructor.name] ?? {} as SchemaObject;
-      schema.properties = schema.properties || {};
-      schema.properties[propertyKey] = data;
-      this.schemas[target.constructor.name] = schema;
+      let schema = Reflect.getMetadata('smoke:schema', target.constructor) ?? {}
+      const copy = { ...schema }
+      copy.properties = copy.properties || {};
+      copy.properties[propertyKey] = data;
+      Reflect.defineMetadata(`smoke:schema`, copy, target.constructor)
     }
   }
 
@@ -84,6 +85,7 @@ export class SmokeDocs {
     requestBodyDescription?: string,
     parameters?: IRequestParameter[],
     description?: string,
+    operationId?: string,
     summary?: string,
     responses: {
       [key: string]: { description: string, value: SchemaObject }
@@ -95,11 +97,17 @@ export class SmokeDocs {
       }
     }
   }) {
-    return (target?: Function, operationId?: string) => {
+    return (target?: Object | Function, operationId?: string) => {
+      let name
+      if (target?.constructor) {
+        name = target.constructor.name
+      } else if (target instanceof Function) {
+        name = target.name
+      }
+
       this.paths[data.path] = this.paths[data.path] ?? {} as Path;
-      const a = this.paths[data.path][data.method]
       this.paths[data.path][data.method] = {
-        operationId: `${target?.name ?? ''}_${data.method}_${data.parameters?.length}}`,
+        operationId: data.operationId || operationId || `${name ?? ''}_${data.method}_${data.parameters?.length}}`,
         description: data.description,
         parameters: data.parameters,
         tags: data.tags,

@@ -1,9 +1,9 @@
 import { RequestHandler } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
-import { ExceptionHandler } from "winston";
 import { Application } from "../../core/app";
 import { Controller, Methods } from "../../core/controller";
+import { Documentation } from "../../core/documentation/SmokeDocs";
 import { ServiceController } from "../../core/ServiceController";
 import { User } from "./user.entity";
 import { UserService } from "./user.service";
@@ -27,6 +27,20 @@ export class UserController extends ServiceController<User>  {
     this.loadDocumentation()
   }
 
+  @Documentation.addRoute({
+    path: "/userException",
+    method: Methods.POST,
+    description: '123',
+    tags: ['User'],
+    summary: "Get all users",
+    requestBody: { $ref: Documentation.getRef(User), },
+    responses: {
+      200: {
+        description: "Success",
+        value: { $ref: Documentation.getRef(User) }
+      }
+    },
+  })
   exception() {
     throw new Error("Exception")
   }

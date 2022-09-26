@@ -7,6 +7,7 @@ import { Documentation } from '../core/documentation/SmokeDocs';
 import morgan from '../core/morgan';
 import { Settings } from "../core/settings";
 import { User, UserController, UserDao, UserService } from "../Example/users";
+import { BaseUser } from './users/baseUser';
 
 const settings = new Settings()
 
