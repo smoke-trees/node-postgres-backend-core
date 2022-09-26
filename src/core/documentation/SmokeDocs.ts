@@ -115,7 +115,7 @@ export class SmokeDocs {
   }) {
     return (target?: Object | Function, operationId?: string) => {
       if (!this.enabled) {
-        return {} as SchemaObject
+        return {} 
       }
       let name
       if (target?.constructor) {
