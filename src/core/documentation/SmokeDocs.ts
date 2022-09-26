@@ -13,10 +13,17 @@ export class SmokeDocs {
   public servers: ServerObject[] = []
   public info: IInfoObject = { description: '', title: '' }
   public paths: { [key: string]: Paths } = {}
+  private enabled = true
 
   constructor() {
     this.refs = {}
     this.schemas = {}
+  }
+  public disableDocumentation() {
+    this.enabled = false
+  }
+  public enableDocumentation() {
+    this.enabled = true
   }
 
   setBasePath(path: string) {
@@ -29,8 +36,11 @@ export class SmokeDocs {
 
   addSchema(data: Partial<SchemaObject>) {
     return (target: Function) => {
+      if (!this.enabled) {
+        return
+      }
       let schema = Reflect.getMetadata('smoke:schema', target) ?? {} as SchemaObject;
-      const copy = { ...schema, ...data }
+      const copy = this.createDeepCopy(schema)
       this.schemas[target.name] = copy;
       this.refs[target.name] = `#/components/schemas/${target.name}`;
     }
@@ -39,8 +49,11 @@ export class SmokeDocs {
 
   public addField(data: SchemaObject) {
     return (target: Object, propertyKey: string) => {
+      if (!this.enabled) {
+        return
+      }
       let schema = Reflect.getMetadata('smoke:schema', target.constructor) ?? {}
-      const copy = { ...schema }
+      const copy = this.createDeepCopy(schema)
       copy.properties = copy.properties || {};
       copy.properties[propertyKey] = data;
       Reflect.defineMetadata(`smoke:schema`, copy, target.constructor)
@@ -58,6 +71,9 @@ export class SmokeDocs {
   }
 
   public getSchema(target: Function | string): SchemaObject {
+    if (!this.enabled) {
+      return {} as SchemaObject
+    }
     let name
     if (typeof target === 'string') {
       name = target
@@ -98,6 +114,9 @@ export class SmokeDocs {
     }
   }) {
     return (target?: Object | Function, operationId?: string) => {
+      if (!this.enabled) {
+        return {} as SchemaObject
+      }
       let name
       if (target?.constructor) {
         name = target.constructor.name
@@ -164,6 +183,9 @@ export class SmokeDocs {
         schemas: this.schemas
       }
     }
+  }
+  private createDeepCopy<T>(data: T): T {
+    return JSON.parse(JSON.stringify(data))
   }
 }
 

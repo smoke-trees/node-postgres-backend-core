@@ -47,9 +47,7 @@ Documentation.addInfo({
   version: '1.0.0'
 })
 
-console.log(JSON.stringify(Documentation.getAPIJson()))
-
-
+console.log(JSON.stringify(Documentation.getAPIJson(), null, 2))
 
 app.loadMiddleware()
 app.loadControllers()
