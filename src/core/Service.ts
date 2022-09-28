@@ -56,7 +56,7 @@ export abstract class Service<Entity extends BaseEntity> implements IService<Ent
   async readMany(page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC', field?: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[])
     : Promise<WithCount<Result<Entity[]>>> {
     const result = await this.dao.readMany(page, count, order, field, where)
-    return new ResultWithCount(result.status.error, result.status.code, result.message, result.result, count);
+    return new ResultWithCount(result.status.error, result.status.code, result.message, result.result, result.count ?? null);
   }
   async readManyWithoutPagination(order: 'ASC' | 'DESC' = 'DESC', field?: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]):
     Promise<Result<Entity[] | null>> {

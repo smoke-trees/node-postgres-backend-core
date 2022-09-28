@@ -85,7 +85,7 @@ export class ResultWithCount<T> extends Result<T> implements WithCount<IResult<T
    * @param result Result for operation 
    * @param count Count of items in result
    */
-  constructor(error: boolean, code: ErrorCode, message?: string, result?: T, count?: number) {
+  constructor(error: boolean, code: ErrorCode, message?: string, result?: T, count: number | null = null) {
     super(error, code, message)
     this.status = {
       code,
