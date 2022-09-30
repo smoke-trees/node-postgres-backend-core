@@ -243,8 +243,10 @@ export class Dao<Entity extends BaseEntity> {
     }
     const repository = manager.getRepository(this.entity);
 
-
     try {
+      if (where) {
+        where = this.parseFilter(where)
+      }
       const orderValue: any = { [field]: order }
       const result = await repository.find({
         order: orderValue,
