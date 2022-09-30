@@ -52,6 +52,7 @@ export class SmokeDocs {
       if (!this.enabled) {
         return
       }
+      this.refs[target.constructor.name] = `#/components/schemas/${target.constructor.name}`;
       let schema = Reflect.getMetadata('smoke:schema', target.constructor) ?? {}
       const copy = this.createDeepCopy(schema)
       copy.properties = copy.properties || {};
