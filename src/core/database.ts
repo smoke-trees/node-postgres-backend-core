@@ -1,4 +1,5 @@
 import { DataSource, DataSourceOptions, EntitySchema, MixedList } from 'typeorm';
+import { DatabaseLogger } from './DatabaseLogger';
 import log from './log';
 import { Settings } from './settings';
 export class Database {
@@ -84,7 +85,9 @@ export class Database {
       migrations: this.migrations,
       synchronize: this.settings.syncDatabase,
       migrationsRun: this.settings.runMigrations,
-      logging: ['error', 'migration']
+      logging: ['error', 'migration'],
+      logger: new DatabaseLogger(),
+      ...this.settings.databaseSettings
     }
     return config
   }
