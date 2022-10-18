@@ -16,6 +16,7 @@ export class Settings implements ISettings {
   pgUser: string;
   interceptors: boolean;
   syncDatabase: boolean;
+  isAuthorizationDisabled: boolean;
   runMigrations: boolean;
   production: boolean;
   databaseSettings: Partial<Omit<PostgresConnectionOptions, 'username' | 'password' | 'port' | 'type' | 'host' | 'database' | 'entities' | 'migrations' | 'synchronize' | 'migrationsRun' | 'name'>>;
@@ -32,6 +33,7 @@ export class Settings implements ISettings {
     this.syncDatabase = this.production ? false : true
     this.runMigrations = this.production ? true : false
     this.databaseSettings = {}
+    this.isAuthorizationDisabled = false
   }
 
   getValue(key: string, defaultValue: string): string;

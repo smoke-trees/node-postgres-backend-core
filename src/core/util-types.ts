@@ -1,0 +1,1 @@
+export type Optional<T, P extends keyof T> = Pick<Partial<T>, P> & Omit<T, P>;
