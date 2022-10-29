@@ -1,4 +1,4 @@
-import { BaseEntity } from "typeorm";
+import { BaseEntity } from "../BaseEntity";
 import { IBaseResourceDetails, IResourceNameDetails } from "./ISRN";
 import { isValidResourceName, ResourceNameRegex } from "./SRNService";
 
@@ -7,6 +7,10 @@ export abstract class BaseResource extends BaseEntity implements IBaseResourceDe
     abstract projectName: string;
     abstract serviceName: string;
     abstract resourcePath: string;
+
+    constructor() {
+        super();
+    }
 
     get srn() {
         return `srn::${this.projectName}:${this.serviceName}:${this.resourcePath}::${this.id}`;

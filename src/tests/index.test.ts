@@ -6,14 +6,17 @@ import Database from "../core/database";
 import morgan from '../core/morgan';
 import { Settings } from "../core/settings";
 import { User, UserController, UserDao, UserService } from "../Example/users";
-import { ExampleControllerTest } from "./app/ExampleTests/controller.test";
-import { ExampleServiceTest } from "./app/ExampleTests/services.test";
+import { Wallet, WalletController, WalletDao, WalletService } from '../Example/wallet';
+import { ExampleControllerTest } from "./app/User/controller.test";
+import { ExampleServiceTest } from './app/User/services.test';
+import { ExampleWalletServiceTest } from './app/Wallet/services.test';
 import { clearUserTable } from "./utils/clear-database.test";
 
 const settings = new Settings()
 
 const database = new Database(settings)
 database.addEntity(User)
+database.addEntity(Wallet)
 const app = new Application(settings, database)
 
 app.addMiddleWare(morgan)
@@ -25,7 +28,12 @@ const userDao = new UserDao(database)
 const userService = new UserService(userDao)
 const userController = new UserController(app, userService);
 
+const walletDao = new WalletDao(database)
+const walletService = new WalletService(walletDao)
+const walletController = new WalletController(app, walletService);
+
 app.addController(userController)
+app.addController(walletController)
 
 app.loadMiddleware()
 app.loadControllers()
@@ -40,4 +48,5 @@ describe("Test Suite", function () {
 
   ExampleServiceTest(database, userService)
   ExampleControllerTest(app)
+  ExampleWalletServiceTest(database, walletService)
 })
