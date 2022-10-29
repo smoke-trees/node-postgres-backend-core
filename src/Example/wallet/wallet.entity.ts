@@ -2,11 +2,11 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { BaseEntity } from "../../core/BaseEntity";
 import { Documentation } from "../../core/documentation/SmokeDocs";
 import { Validator } from "../../core/Validator";
-import { IUser } from "./IUser";
+import { IWallet } from "./IWallet";
 
 @Documentation.addSchema({ type: "object", description: "User entity" })
-@Entity({ name: 'user_test_table' })
-export class User extends BaseEntity implements IUser {
+@Entity({ name: 'wallet_test_table' })
+export class Wallet extends BaseEntity implements IWallet {
   @PrimaryGeneratedColumn('increment', { name: 'id' })
   @Documentation.addField({ type: "number", format: "int32", description: "User id" })
   id!: number;
@@ -17,7 +17,7 @@ export class User extends BaseEntity implements IUser {
   name!: string;
 
 
-  constructor(it?: Partial<IUser>) {
+  constructor(it?: Partial<IWallet>) {
     super();
     if (it) {
       this.name = it.name!;

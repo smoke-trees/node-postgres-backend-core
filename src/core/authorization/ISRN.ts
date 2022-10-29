@@ -8,9 +8,19 @@ export interface IResourceNameDetails {
     resourceId: string;
 }
 
+export interface IBaseResourceDetails {
+    id: number | string;
+    projectName: string;
+    serviceName: string;
+    resourcePath: string;
+    get srn(): string;
+    get resourceDetails(): IResourceNameDetails | null
+    get srnRegexString(): string | null
+}
+
 export interface IPolicy {
     id: number | string;
-    rules: IRule[];
+    rules: IRuleWithResourceDetails[];
 }
 export type IPolicyCreate = Optional<IPolicy, "id">;
 
@@ -19,9 +29,20 @@ export interface IRule {
     effect: 'ALLOW' | 'DENY';
     resourceName: string;
 }
+
+export interface IRuleWithResourceDetails {
+    action: string;
+    effect: 'ALLOW' | 'DENY';
+    resourceDetails: IBaseResourceDetails;
+}
 export interface IRequestAction {
     action: string;
     resourceName: string;
+}
+
+export interface IRequestActionWithResourceDetails {
+    action: string;
+    resource: IBaseResourceDetails;
 }
 
 export interface IUserGroup {
