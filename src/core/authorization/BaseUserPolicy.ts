@@ -1,12 +1,13 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "../BaseEntity";
 import { BasePolicy } from "./BasePolicy";
 import { BaseUser } from "./BaseUser";
-import { IUserPolicyCreate } from "./ISRN";
+import { IBaseUserPolicyCreate } from "./ISRN";
 
 @Entity({ name: 'user_policy' })
 export abstract class BaseUserPolicy extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
-  id!: string;
+  id!: string | number;
 
   @Column('uuid', { name: 'user_id' })
   userId!: string | number;
@@ -14,11 +15,15 @@ export abstract class BaseUserPolicy extends BaseEntity {
   @Column('uuid', { name: 'policy_id' })
   policyId!: string | number;
 
-  abstract user?: BaseUser;
+  @ManyToOne(() => BasePolicy, policy => policy.userPolicies, { eager: false })
+  @JoinColumn({ name: 'policy_id' })
+  policy?: BasePolicy;
 
-  abstract policy?: BasePolicy;
+  @ManyToOne(() => BaseUser, user => user.userPolicies, { eager: false })
+  @JoinColumn({ name: 'user_id' })
+  user?: BaseUser;
 
-  constructor(employeePolicy?: IUserPolicyCreate) {
+  constructor(employeePolicy?: IBaseUserPolicyCreate) {
     super()
     if (employeePolicy) {
       const { id, userId, policyId } = employeePolicy

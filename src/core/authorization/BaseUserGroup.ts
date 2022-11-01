@@ -1,10 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "../BaseEntity";
 import { BaseGroup } from "./BaseGroup";
 import { BaseUser } from "./BaseUser";
-import { IUserGroup, IUserGroupCreate } from "./ISRN";
+import { IBaseUserGroup, IBaseUserGroupCreate } from "./ISRN";
 
 @Entity({ name: 'user_group' })
-export abstract class BaseUserGroup extends BaseEntity implements IUserGroup {
+export abstract class BaseUserGroup extends BaseEntity implements IBaseUserGroup {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id!: string | number;
 
@@ -14,11 +15,15 @@ export abstract class BaseUserGroup extends BaseEntity implements IUserGroup {
   @Column('uuid', { name: 'group_id' })
   groupId!: string | number;
 
-  abstract user?: BaseUser;
+  @ManyToOne(() => BaseGroup, group => group.userGroups, { eager: false })
+  @JoinColumn({ name: 'group_id' })
+  group?: BaseGroup;
 
-  abstract group?: BaseGroup;
+  @ManyToOne(() => BaseUser, policy => policy.userGroups, { eager: false })
+  @JoinColumn({ name: 'user_id' })
+  user?: BaseUser;
 
-  constructor(userPolicy?: IUserGroupCreate) {
+  constructor(userPolicy?: IBaseUserGroupCreate) {
     super()
     if (userPolicy) {
       const { id, userId, groupId } = userPolicy

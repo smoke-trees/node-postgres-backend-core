@@ -1,90 +1,82 @@
 import { Optional } from "../util-types";
 
-export interface IResourceNameDetails {
-    projectName: string;
-    serviceName: string;
-    resourcePath: string;
-    resourcePathSegments: string[];
-    resourceId: string;
+export interface IBaseEntity {
+    id: string | number;
+    createdAt: Date;
+    updatedAt: Date;
+    validate: (validator: boolean, required: boolean, updatable: boolean) => string[];
 }
-
-export interface IBaseResourceDetails {
-    id: number | string;
+export interface IBaseResource extends IBaseEntity {
     projectName: string;
     serviceName: string;
     resourcePath: string;
+    get resourcePathSegments(): string[] | null;
     get srn(): string;
-    get resourceDetails(): IResourceNameDetails | null
     get srnRegexString(): string | null
 }
 
-export interface IPolicy {
-    id: number | string;
-    rules: IRuleWithResourceDetails[];
-}
-export type IPolicyCreate = Optional<IPolicy, "id">;
+export type IResourceCreate = Optional<IBaseResource, 'id' | 'createdAt' | 'updatedAt'>;
 
-export interface IRule {
+// export interface IBasePolicy {
+//     id: number | string;
+//     rules: IBaseRule[];
+//     doesPolicyAllowRequest(requestAction: IBaseRequestAction): ResourceMatchResponse
+// }
+// export type IPolicyCreate = Optional<IBasePolicy, "id">;
+
+export interface IBaseRule {
     action: string;
     effect: 'ALLOW' | 'DENY';
-    resourceName: string;
+    resourceDetails: IBaseResource;
+    doesRuleAllowRequest(requestAction: IBaseRequestAction): ResourceMatchResponse;
 }
 
-export interface IRuleWithResourceDetails {
+// export type IRuleCreate = Optional<IBaseRule, "">;
+
+export interface IBaseRequestAction {
     action: string;
-    effect: 'ALLOW' | 'DENY';
-    resourceDetails: IBaseResourceDetails;
-}
-export interface IRequestAction {
-    action: string;
-    resourceName: string;
+    resource: IBaseResource;
 }
 
-export interface IRequestActionWithResourceDetails {
-    action: string;
-    resource: IBaseResourceDetails;
-}
-
-export interface IUserGroup {
+export interface IBaseUserGroup {
     id: string | number;
     groupId: string | number;
     userId: string | number;
 }
 
-export type IUserGroupCreate = Optional<IUserGroup, "id">;
+export type IBaseUserGroupCreate = Optional<IBaseUserGroup, "id">;
 
-export interface IUserPolicy {
-    id: string;
+export interface IBaseUserPolicy {
+    id: number | string;
     policyId: string | number;
     userId: string | number;
 }
 
-export type IUserPolicyCreate = Optional<IUserPolicy, 'id'>
+export type IBaseUserPolicyCreate = Optional<IBaseUserPolicy, 'id'>
 
-export interface IGroupPolicy {
-    id: string;
+export interface IBasePolicy {
+    id: number | string;
+    rules: IBaseRule[];
+    doesPolicyAllowRequest(requestAction: IBaseRequestAction): ResourceMatchResponse
+}
+
+export type IBasePolicyCreate = Optional<IBasePolicy, 'id'>
+
+export interface IBaseGroupPolicy {
+    id: number | string;
     policyId: string | number;
     groupId: string | number;
 }
 
-export type IGroupPolicyCreate = Optional<IGroupPolicy, 'id'>
-
-
-export interface GroupPolicyInterface {
-    groupToPolicyId?: string;
-    groupId: string | number;
-    policyId: string;
-}
-
-export interface UserGroupInterface {
-    employeeToGroupId?: string;
-    employeeId: string;
-    groupId: string;
-}
+export type IBaseGroupPolicyCreate = Optional<IBaseGroupPolicy, 'id'>
 
 export enum ResourceMatchResponse {
     ALLOW = 'ALLOW',
     DENY = 'DENY',
     UNMATCHED = 'UNMATCHED'
+}
+
+export interface IBaseGroup {
+    id: number | string;
 }
 

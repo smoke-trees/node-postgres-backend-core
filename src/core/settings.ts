@@ -28,7 +28,7 @@ export class Settings implements ISettings {
     this.pgHost = this.getValue('PGHOST', 'localhost')
     this.pgPassword = this.getValue('PGPASSWORD', 'mysecretpassword')
     this.pgDatabase = this.getValue('PGDATABASE', 'postgres')
-    this.pgPort = this.getValue('PGPORT', '5432')
+    this.pgPort = this.getValue('PGPORT', '80')
     this.pgUser = this.getValue('PGUSER', 'postgres')
     this.syncDatabase = this.production ? false : true
     this.runMigrations = this.production ? true : false

@@ -1,30 +1,42 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "../BaseEntity";
+import { BaseGroupPolicy } from "./BaseGroupPolicy";
 import { BaseRule } from "./BaseRule";
 import { BaseUserPolicy } from "./BaseUserPolicy";
-import { IPolicy, IPolicyCreate, IRequestActionWithResourceDetails, ResourceMatchResponse } from "./ISRN";
+import { IBasePolicy, IBaseRequestAction, ResourceMatchResponse } from "./ISRN";
 
 @Entity({ name: 'policy' })
-export abstract class BasePolicy extends BaseEntity implements IPolicy {
+export abstract class BasePolicy extends BaseEntity implements IBasePolicy {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id!: string | number;
 
   @Column({ name: 'rules', type: 'json' })
   rules!: BaseRule[];
 
-  abstract userPolicies?: BaseUserPolicy;
+  @OneToMany(() => BaseUserPolicy, userPolicy => userPolicy.policy, {
+    eager: true,
+    cascade: ['remove', 'soft-remove']
+  })
+  userPolicies?: BaseUserPolicy[];
 
-  constructor(policy?: IPolicyCreate) {
+  @OneToMany(() => BaseGroupPolicy, groupPolicy => groupPolicy.policy, {
+    eager: true,
+    cascade: ['remove', 'soft-remove']
+  })
+  groupPolicies?: BaseGroupPolicy[];
+
+  constructor(policy?: IBasePolicy) {
     super()
     if (policy) {
       const { id, rules } = policy
-      // this.rules = rules
+      this.rules = rules
       if (id) {
         this.id = id
       }
     }
   }
 
-  doesPolicyAllowRequest(requestAction: IRequestActionWithResourceDetails): ResourceMatchResponse {
+  doesPolicyAllowRequest(requestAction: IBaseRequestAction): ResourceMatchResponse {
     let matchResponses: ResourceMatchResponse[] = []
     for (let rule of this.rules) {
       let response: ResourceMatchResponse = rule.doesRuleAllowRequest(requestAction)

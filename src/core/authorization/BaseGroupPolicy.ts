@@ -1,12 +1,13 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "../BaseEntity";
+import { BaseGroup } from "./BaseGroup";
 import { BasePolicy } from "./BasePolicy";
-import { BaseUser } from "./BaseUser";
-import { IGroupPolicy, IGroupPolicyCreate } from "./ISRN";
+import { IBaseGroupPolicy, IBaseGroupPolicyCreate } from "./ISRN";
 
 @Entity({ name: 'group_policy' })
-export abstract class BaseGroupPolicy extends BaseEntity implements IGroupPolicy {
+export abstract class BaseGroupPolicy extends BaseEntity implements IBaseGroupPolicy {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
-  id!: string;
+  id!: string | number;
 
   @Column('uuid', { name: 'group_id' })
   groupId!: string | number;
@@ -14,11 +15,15 @@ export abstract class BaseGroupPolicy extends BaseEntity implements IGroupPolicy
   @Column('uuid', { name: 'policy_id' })
   policyId!: string | number;
 
-  abstract user?: BaseUser;
+  @ManyToOne(() => BaseGroup, group => group.groupPolicies, { eager: false })
+  @JoinColumn({ name: 'group_id' })
+  group?: BaseGroup;
 
-  abstract policy?: BasePolicy;
+  @ManyToOne(() => BasePolicy, policy => policy.groupPolicies, { eager: false })
+  @JoinColumn({ name: 'policy_id' })
+  policy?: BasePolicy;
 
-  constructor(employeePolicy?: IGroupPolicyCreate) {
+  constructor(employeePolicy?: IBaseGroupPolicyCreate) {
     super()
     if (employeePolicy) {
       const { id, groupId, policyId } = employeePolicy

@@ -1,15 +1,15 @@
 import log from "../log";
 import { BaseResource } from "./BaseResource";
-import { IRequestActionWithResourceDetails, IRule, IRuleWithResourceDetails, ResourceMatchResponse } from "./ISRN";
+import { IBaseRequestAction, IBaseRule, ResourceMatchResponse } from "./ISRN";
 import { isValidResourceName } from "./SRNService";
 
-export abstract class BaseRule implements IRuleWithResourceDetails {
-    abstract id: string | number;
+export abstract class BaseRule implements IBaseRule {
+    // abstract id: string | number;
     abstract effect: 'ALLOW' | 'DENY';
     abstract resourceDetails: BaseResource
     abstract action: string;
 
-    doesRuleAllowRequest(requestAction: IRequestActionWithResourceDetails) {
+    doesRuleAllowRequest(requestAction: IBaseRequestAction) {
         if (isValidResourceName(this.resourceDetails.srn) && isValidResourceName(requestAction.resource.srn)) {
             if (this.action === requestAction.action && new RegExp(this.resourceDetails.srnRegexString!, 'gmi').test(requestAction.resource.srn)) {
                 return this.effect == 'ALLOW' ? ResourceMatchResponse.ALLOW : ResourceMatchResponse.DENY
@@ -21,4 +21,17 @@ export abstract class BaseRule implements IRuleWithResourceDetails {
             return ResourceMatchResponse.UNMATCHED
         }
     }
+
+    // constructor(rule?: IRule) {
+    //     // super()
+    //     if (rule) {
+    //         const { action, effect, resourceDetails } = rule
+    //         this.action = action
+    //         this.effect = effect
+    //         this.resourceDetails = resourceDetails
+    //         if (id) {
+    //             this.id = id
+    //         }
+    //     }
+    // }
 }

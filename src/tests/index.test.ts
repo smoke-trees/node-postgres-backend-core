@@ -5,7 +5,12 @@ import { Application } from "../core/app";
 import Database from "../core/database";
 import morgan from '../core/morgan';
 import { Settings } from "../core/settings";
+import { Group } from '../Example/group';
+import { GroupPolicy } from '../Example/group_policy';
+import { Policy } from '../Example/policy';
 import { User, UserController, UserDao, UserService } from "../Example/users";
+import { UserGroup } from '../Example/user_group';
+import { UserPolicy } from '../Example/user_policy';
 import { Wallet, WalletController, WalletDao, WalletService } from '../Example/wallet';
 import { ExampleControllerTest } from "./app/User/controller.test";
 import { ExampleServiceTest } from './app/User/services.test';
@@ -17,6 +22,12 @@ const settings = new Settings()
 const database = new Database(settings)
 database.addEntity(User)
 database.addEntity(Wallet)
+database.addEntity(Policy)
+database.addEntity(Group)
+database.addEntity(UserPolicy)
+database.addEntity(UserGroup)
+database.addEntity(GroupPolicy)
+
 const app = new Application(settings, database)
 
 app.addMiddleWare(morgan)

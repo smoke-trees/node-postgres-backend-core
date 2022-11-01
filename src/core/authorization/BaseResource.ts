@@ -1,8 +1,8 @@
 import { BaseEntity } from "../BaseEntity";
-import { IBaseResourceDetails, IResourceNameDetails } from "./ISRN";
+import { IBaseResource } from "./ISRN";
 import { isValidResourceName, ResourceNameRegex } from "./SRNService";
 
-export abstract class BaseResource extends BaseEntity implements IBaseResourceDetails {
+export abstract class BaseResource extends BaseEntity implements IBaseResource {
     abstract id: string | number;
     abstract projectName: string;
     abstract serviceName: string;
@@ -11,25 +11,33 @@ export abstract class BaseResource extends BaseEntity implements IBaseResourceDe
     constructor() {
         super();
     }
+    get resourcePathSegments(): string[] | null {
+        if (isValidResourceName(this.srn)) {
+            let r = RegExp(ResourceNameRegex, 'gmi');
+            let m = r.exec(this.srn);
+            return m![4].split('/');
+        }
+        return null
+    }
 
     get srn() {
         return `srn::${this.projectName}:${this.serviceName}:${this.resourcePath}::${this.id}`;
     }
 
-    get resourceDetails(): IResourceNameDetails | null {
-        if (isValidResourceName(this.srn)) {
-            let r = RegExp(ResourceNameRegex, 'gmi');
-            let m = r.exec(this.srn);
-            return {
-                projectName: m![2],
-                serviceName: m![3],
-                resourcePath: m![4],
-                resourcePathSegments: m![4].split('/'),
-                resourceId: m![9],
-            }
-        }
-        return null
-    }
+    // get resourceDetails(): IResourceNameDetails | null {
+    //     if (isValidResourceName(this.srn)) {
+    //         let r = RegExp(ResourceNameRegex, 'gmi');
+    //         let m = r.exec(this.srn);
+    //         return {
+    //             projectName: m![2],
+    //             serviceName: m![3],
+    //             resourcePath: m![4],
+    //             resourcePathSegments: m![4].split('/'),
+    //             resourceId: m![9],
+    //         }
+    //     }
+    //     return null
+    // }
 
     get srnRegexString(): string | null {
         if (isValidResourceName(this.srn)) {
