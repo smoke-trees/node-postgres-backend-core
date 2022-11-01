@@ -4,7 +4,7 @@ import { IBasePolicy } from "../../core/authorization/ISRN";
 import { Documentation } from "../../core/documentation/SmokeDocs";
 import { IGroup } from "./IGroup";
 
-@Documentation.addSchema({ type: "object", description: "User entity" })
+@Documentation.addSchema({ type: "object", description: "Group entity" })
 @Entity({ name: 'group_test_table' })
 export class Group extends BaseGroup implements IGroup {
   @Column({ name: 'name', type: 'varchar', length: 255 })

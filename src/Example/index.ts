@@ -2,14 +2,15 @@ import { ContextProvider } from '@smoke-trees/smoke-context';
 import compression from 'compression';
 import express from 'express';
 import { Application } from "../core/app";
-import { BaseGroup } from '../core/authorization/BaseGroup';
-import { BaseGroupPolicy } from '../core/authorization/BaseGroupPolicy';
 import Database from "../core/database";
 import { Documentation } from '../core/documentation/SmokeDocs';
 import morgan from '../core/morgan';
 import { Settings } from "../core/settings";
 import { User, UserController, UserDao, UserService } from "../Example/users";
+import { Group } from './group';
+import { GroupPolicy } from './group_policy';
 import { Policy } from './policy';
+import { UserGroup } from './user_group';
 import { UserPolicy } from './user_policy';
 import { WalletDao, WalletService, WalletController, Wallet } from './wallet';
 
@@ -19,9 +20,10 @@ const database = new Database(settings)
 database.addEntity(User)
 database.addEntity(Wallet)
 database.addEntity(Policy)
+database.addEntity(Group)
 database.addEntity(UserPolicy)
-database.addEntity(BaseGroup)
-database.addEntity(BaseGroupPolicy)
+database.addEntity(UserGroup)
+database.addEntity(GroupPolicy)
 
 
 const app = new Application(settings, database)

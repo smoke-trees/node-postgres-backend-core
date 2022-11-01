@@ -23,10 +23,10 @@ export abstract class BaseUserGroup extends BaseEntity implements IBaseUserGroup
   @JoinColumn({ name: 'user_id' })
   user?: BaseUser;
 
-  constructor(userPolicy?: IBaseUserGroupCreate) {
+  constructor(userGroup?: IBaseUserGroupCreate) {
     super()
-    if (userPolicy) {
-      const { id, userId, groupId } = userPolicy
+    if (userGroup) {
+      const { id, userId, groupId } = userGroup
       if (id) {
         this.id = id
       }

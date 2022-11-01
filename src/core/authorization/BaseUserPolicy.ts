@@ -23,10 +23,10 @@ export abstract class BaseUserPolicy extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user?: BaseUser;
 
-  constructor(employeePolicy?: IBaseUserPolicyCreate) {
+  constructor(userPolicy?: IBaseUserPolicyCreate) {
     super()
-    if (employeePolicy) {
-      const { id, userId, policyId } = employeePolicy
+    if (userPolicy) {
+      const { id, userId, policyId } = userPolicy
       if (id) {
         this.id = id
       }

@@ -23,10 +23,10 @@ export abstract class BaseGroupPolicy extends BaseEntity implements IBaseGroupPo
   @JoinColumn({ name: 'policy_id' })
   policy?: BasePolicy;
 
-  constructor(employeePolicy?: IBaseGroupPolicyCreate) {
+  constructor(groupPolicy?: IBaseGroupPolicyCreate) {
     super()
-    if (employeePolicy) {
-      const { id, groupId, policyId } = employeePolicy
+    if (groupPolicy) {
+      const { id, groupId, policyId } = groupPolicy
       if (id) {
         this.id = id
       }
