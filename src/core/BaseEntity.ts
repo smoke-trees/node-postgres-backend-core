@@ -27,14 +27,16 @@ export class BaseEntity {
   createdAt!: Date;
 
   constructor(data?: any) {
-    if (data.id) {
-      this.id = data.id
-    }
-    if (!isNaN(data.updatedAt)) {
-      this.updatedAt = data.updatedAt
-    }
-    if (!isNaN(data.createdAt)) {
-      this.createdAt = data.createdAt
+    if (data) {
+      if (data.id) {
+        this.id = data.id
+      }
+      if (!isNaN(data.updatedAt)) {
+        this.updatedAt = data.updatedAt
+      }
+      if (!isNaN(data.createdAt)) {
+        this.createdAt = data.createdAt
+      }
     }
   }
 
