@@ -31,10 +31,10 @@ export class BaseEntity {
       if (data.id) {
         this.id = data.id
       }
-      if (!isNaN(data.updatedAt)) {
+      if (data.updatedAt && !isNaN(data.updatedAt)) {
         this.updatedAt = data.updatedAt
       }
-      if (!isNaN(data.createdAt)) {
+      if (data.createdAt && !isNaN(data.createdAt)) {
         this.createdAt = data.createdAt
       }
     }
