@@ -1,6 +1,6 @@
 import { Entity, EntityManager, EntityTarget, FindOneOptions, FindOptionsWhere, In } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { IResult, ErrorCode, WithCount } from "./result";
+import { ErrorCode, WithCount, Result, ResultWithCount } from "./result";
 import { BaseEntity } from "./BaseEntity";
 import Database from "./database";
 import log from "./log";
@@ -31,7 +31,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns 
    */
-  async create(value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[], manager?: EntityManager): Promise<IResult<number | string>> {
+  async create(value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[], manager?: EntityManager): Promise<Result<number | string>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -42,24 +42,10 @@ export class Dao<Entity extends BaseEntity> {
         value.id = result.identifiers[0].id ?? (result.identifiers[0] as [key: string])[0];
       }
       log.info("Successfully created", `${this.entityName}/create`, {});
-      return {
-        status: {
-          error: false,
-          code: ErrorCode.Created
-        },
-        message: "Success in insert",
-        result: result.identifiers[0].id
-      }
+      return new Result(false, ErrorCode.Created, "Success in insert", result.identifiers[0].id)
     } catch (error) {
       log.error(`Error in inserting ${this.entityName}`, `${this.entityName}/insert`, error);
-      return {
-        status: {
-          error: true,
-          code: ErrorCode.DatabaseError
-        },
-        message: "Error in insert",
-        result: null
-      }
+      return new Result(false, ErrorCode.DatabaseError, 'Error in insert')
     }
   }
 
@@ -69,7 +55,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions 
    * @returns Result with the entity 
    */
-  async read(value: string | number | FindOneOptions<Entity>, manager?: EntityManager): Promise<IResult<Entity>> {
+  async read(value: string | number | FindOneOptions<Entity>, manager?: EntityManager): Promise<Result<Entity>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -84,34 +70,13 @@ export class Dao<Entity extends BaseEntity> {
       const result = await repository.findOne(options);
       if (!result) {
         log.debug("Find not found", `${this.entityName}/read`, { id: value });
-        return {
-          status: {
-            error: true,
-            code: ErrorCode.NotFound
-          },
-          message: "Not found",
-          result: null
-        }
+        return new Result(true, ErrorCode.NotFound, 'Not found')
       }
       log.debug("Successfully found", `${this.entityName}/read`, { id: value });
-      return {
-        status: {
-          error: false,
-          code: ErrorCode.Success
-        },
-        message: "Success in read",
-        result: result
-      }
+      return new Result(false, ErrorCode.Success, "Success in read", result)
     } catch (error) {
       log.error("Error in reading", `${this.update}/read`, error, { id: value });
-      return {
-        status: {
-          error: true,
-          code: ErrorCode.DatabaseError
-        },
-        message: "Error in reading",
-        result: null
-      }
+      return new Result(true, ErrorCode.DatabaseError, "Error in reading")
     }
   }
 
@@ -122,7 +87,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns Result with the number of rows updated 
    */
-  async update(id: string | number | FindOptionsWhere<Entity>, values: QueryDeepPartialEntity<Entity>, manager?: EntityManager): Promise<IResult<number>> {
+  async update(id: string | number | FindOptionsWhere<Entity>, values: QueryDeepPartialEntity<Entity>, manager?: EntityManager): Promise<Result<number | null>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -132,34 +97,14 @@ export class Dao<Entity extends BaseEntity> {
       const result = await repository.update(id, copy);
       if (result.affected === 0) {
         log.debug("Update not found", `${this.entityName}/update`, { id, });
-        return {
-          status: {
-            error: true,
-            code: ErrorCode.NotFound
-          },
-          message: "Not found",
-          result: null
-        }
+        return new Result(true, ErrorCode.NotFound, "Not found")
       }
       log.debug("Successfully updated", `${this.entityName}/update`, { id, });
-      return {
-        status: {
-          error: false,
-          code: ErrorCode.Success
-        },
-        message: "Success in update",
-        result: result.affected ?? null
-      }
+      return new Result(false, ErrorCode.Success, 'Success in update', result.affected ?? null)
+
     } catch (error) {
       log.error("Error in updating", `${this.entityName}/update`, error, { id, copy });
-      return {
-        status: {
-          error: true,
-          code: ErrorCode.DatabaseError
-        },
-        message: "Error in updating",
-        result: null
-      }
+      return new Result(true, ErrorCode.DatabaseError, "Error in updating", null)
     }
   }
 
@@ -186,7 +131,7 @@ export class Dao<Entity extends BaseEntity> {
    * @returns Result with the list of entities
    */
   async readMany(page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt',
-    where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], manager?: EntityManager): Promise<WithCount<IResult<Entity[]>>> {
+    where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], manager?: EntityManager): Promise<WithCount<Result<Entity[]>>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -205,26 +150,10 @@ export class Dao<Entity extends BaseEntity> {
       });
       log.debug("Successfully found", `${this.entityName}/readMany`, { page, count, orderValue, field });
       const totalCount = await repository.count({ where });
-      return {
-        status: {
-          error: false,
-          code: ErrorCode.Success
-        },
-        message: "Success in readMany",
-        result,
-        count: totalCount
-      }
+      return new ResultWithCount(false, ErrorCode.Success, 'Success in readMany', result, totalCount)
     } catch (error) {
       log.error("Error in reading", `${this.entityName}/readMany`, error, { page, count, order, field });
-      return {
-        status: {
-          error: true,
-          code: ErrorCode.DatabaseError
-        },
-        message: "Error in reading ",
-        result: null,
-        count: null
-      }
+      return new ResultWithCount(true, ErrorCode.DatabaseError, "Error in reading", null, null)
     }
   }
 
@@ -237,7 +166,7 @@ export class Dao<Entity extends BaseEntity> {
    * @returns 
    */
   async readManyWithoutPagination(order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt', where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], manager?: EntityManager)
-    : Promise<IResult<Entity[]>> {
+    : Promise<Result<Entity[]>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -254,34 +183,13 @@ export class Dao<Entity extends BaseEntity> {
       });
       if (result.length === 0) {
         log.debug("Find not found", `${this.entityName}/readManyWithoutPagination`, { order, field, where });
-        return {
-          status: {
-            error: true,
-            code: ErrorCode.NotFound
-          },
-          message: "Not found",
-          result: null
-        }
+        return new Result(true, ErrorCode.NotFound, "Not found")
       }
       log.debug("Successfully found", `${this.entityName}/readManyWithoutPagination`, { order, field });
-      return {
-        status: {
-          error: false,
-          code: ErrorCode.Success
-        },
-        message: "Success in readMany",
-        result
-      }
+      return new Result(false, ErrorCode.Success, 'Success in read many', result)
     } catch (error) {
       log.error("Error in reading", `${this.entityName}/readManyWithoutPagination`, error, { order, field });
-      return {
-        status: {
-          error: true,
-          code: ErrorCode.DatabaseError
-        },
-        message: "Error in reading ",
-        result: null
-      }
+      return new Result(true, ErrorCode.DatabaseError, "Error in reading")
     }
   }
 
@@ -291,7 +199,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns 
    */
-  async delete(id: string | number | string[] | FindOptionsWhere<Entity>, manager?: EntityManager): Promise<IResult<number>> {
+  async delete(id: string | number | string[] | FindOptionsWhere<Entity>, manager?: EntityManager): Promise<Result<number>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -301,34 +209,13 @@ export class Dao<Entity extends BaseEntity> {
 
       if (result.affected === 0) {
         log.debug("Delete not found", `${this.entityName}/delete`, { id });
-        return {
-          status: {
-            error: true,
-            code: ErrorCode.NotFound
-          },
-          message: "Not found",
-          result: result.affected
-        }
+        return new Result(true, ErrorCode.NotFound, 'Not found', result.affected)
       }
       log.debug("Successfully deleted", `${this.entityName}/delete`, { id });
-      return {
-        status: {
-          error: false,
-          code: ErrorCode.Success
-        },
-        message: "Success in delete",
-        result: result.affected ?? 0
-      }
+      return new Result(false, ErrorCode.Success, 'Success in delete', result.affected ?? 0)
     } catch (error) {
       log.error("Error in deleting", `${this.entityName}/delete`, error, { id });
-      return {
-        status: {
-          error: true,
-          code: ErrorCode.DatabaseError
-        },
-        message: "Error in deleting",
-        result: null
-      }
+      return new Result(true, ErrorCode.DatabaseError, 'Error in deleting')
     }
   }
 }
