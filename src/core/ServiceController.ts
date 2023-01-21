@@ -103,7 +103,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
   }
 
   async readAll(req: Request, res: Response) {
-    const { orderBy, order, page, count, nonPaginated, ...filter } = req.query
+    const { orderBy, order, page, count, nonPaginated, fromCreatedDate, toCreatedDate, like, ...filter } = req.query
     let pageNumberParsed = parseInt(page?.toString() ?? '1')
     let countParsed = parseInt(count?.toString() ?? '10')
     if (isNaN(pageNumberParsed)) {
@@ -116,11 +116,26 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
     if (orderParsed !== 'DESC' && orderParsed !== 'ASC') {
       orderParsed = 'DESC'
     }
+    let fromCreatedDateDate
+    if (fromCreatedDate) {
+      fromCreatedDateDate = new Date(fromCreatedDate.toString())
+      if (isNaN(fromCreatedDateDate.getTime())) {
+        fromCreatedDateDate = undefined
+      }
+    }
+    let toCreatedDateDate
+    if (toCreatedDate) {
+      toCreatedDateDate = new Date(toCreatedDate.toString())
+      toCreatedDateDate.setDate(toCreatedDateDate.getDate() + 1)
+      if (isNaN(toCreatedDateDate.getTime())) {
+        toCreatedDateDate = undefined
+      }
+    }
     let result
     if (nonPaginated?.toString() === 'true') {
-      result = await this.service.readManyWithoutPagination(orderParsed as 'ASC' | "DESC", orderBy?.toString() as keyof Entity, filter as any)
+      result = await this.service.readManyWithoutPagination(orderParsed as 'ASC' | "DESC", orderBy?.toString() as keyof Entity, filter as any, fromCreatedDateDate, toCreatedDateDate, like as any)
     } else {
-      result = await this.service.readMany(pageNumberParsed, countParsed, orderParsed as 'ASC' | "DESC", orderBy?.toString() as keyof Entity, filter as any)
+      result = await this.service.readMany(pageNumberParsed, countParsed, orderParsed as 'ASC' | "DESC", orderBy?.toString() as keyof Entity, filter as any, fromCreatedDateDate, toCreatedDateDate, like as any)
     }
     res.setHeader("X-Count", result.result?.length ?? 0)
     res.status(result.getStatus()).json(result)
@@ -134,17 +149,19 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
 
   async update(req: Request, res: Response) {
     const { id } = req.params
-    const entity = createEntity<Entity>(this.EntityConstructor, req.body)
-    const value = entity.validate(true, false, true)
-    if (value.length > 0) {
-      const result: Result<null> = new Result(
-        true,
-        ErrorCode.BadRequest,
-        value.join(', '),
-        null
-      )
-      res.status(result.getStatus()).json(result)
-      return
+    const entity = req.body
+    if (entity.validate) {
+      const value = entity.validate(true, false, true)
+      if (value.length > 0) {
+        const result: Result<null> = new Result(
+          true,
+          ErrorCode.BadRequest,
+          value.join(', '),
+          null
+        )
+        res.status(result.getStatus()).json(result)
+        return
+      }
     }
     const response = await this.service.update(id, entity as any)
     res.status(response.getStatus()).json(response)

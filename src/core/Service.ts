@@ -53,14 +53,24 @@ export abstract class Service<Entity extends BaseEntity> implements IService<Ent
     const result = await this.dao.read(filter)
     return new Result(result.status.error, result.status.code, result.message, result.result);
   }
-  async readMany(page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC', field?: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[])
+  async readMany(
+    page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC',
+    field?: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
+    fromCreatedDate?: Date, toCreatedDate?: Date,
+    like?: { [key: string]: string }
+  )
     : Promise<WithCount<Result<Entity[]>>> {
-    const result = await this.dao.readMany(page, count, order, field, where)
+    const result = await this.dao.readMany(page, count, order, field, where, fromCreatedDate, toCreatedDate, like)
     return new ResultWithCount(result.status.error, result.status.code, result.message, result.result, result.count ?? null);
   }
-  async readManyWithoutPagination(order: 'ASC' | 'DESC' = 'DESC', field?: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]):
+  async readManyWithoutPagination(
+    order: 'ASC' | 'DESC' = 'DESC',
+    field?: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
+    fromCreatedDate?: Date, toCreatedDate?: Date,
+    like?: { [key: string]: string }
+  ):
     Promise<Result<Entity[] | null>> {
-    const result = await this.dao.readManyWithoutPagination(order, field, where)
+    const result = await this.dao.readManyWithoutPagination(order, field, where, fromCreatedDate, toCreatedDate, like)
     return new Result(result.status.error, result.status.code, result.message, result.result);
   }
   async create(value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[],): Promise<Result<number | string | null>> {

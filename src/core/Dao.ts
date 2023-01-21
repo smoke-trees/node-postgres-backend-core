@@ -1,4 +1,4 @@
-import { Entity, EntityManager, EntityTarget, FindOneOptions, FindOptionsWhere, In } from "typeorm";
+import { Between, Entity, EntityManager, EntityTarget, FindOneOptions, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { ErrorCode, WithCount, Result, ResultWithCount } from "./result";
 import { BaseEntity } from "./BaseEntity";
@@ -116,6 +116,12 @@ export class Dao<Entity extends BaseEntity> {
       if ((where as any)[key] instanceof Array) {
         (where as any)[key] = In((where as any)[key])
       }
+      if ((where as any)[key] === 'true') {
+        (where as any)[key] = true
+      }
+      if ((where as any)[key] === 'false') {
+        (where as any)[key] = false
+      }
     })
     return where
   }
@@ -131,7 +137,10 @@ export class Dao<Entity extends BaseEntity> {
    * @returns Result with the list of entities
    */
   async readMany(page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt',
-    where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], manager?: EntityManager): Promise<WithCount<Result<Entity[]>>> {
+    where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], fromCreatedDate?: Date, toCreatedDate?: Date,
+    like?: { [key: string]: string },
+    manager?: EntityManager,
+  ): Promise<WithCount<Result<Entity[]>>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -141,6 +150,31 @@ export class Dao<Entity extends BaseEntity> {
       if (where) {
         where = this.parseFilter(where)
       }
+      if (like) {
+        like = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it]); return acc; }, {} as any)
+      } else {
+        like = {}
+      }
+
+      if (fromCreatedDate && toCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: Between(fromCreatedDate, toCreatedDate) }
+      } else if (fromCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: MoreThanOrEqual(fromCreatedDate) }
+      }
+      else if (toCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: LessThanOrEqual(toCreatedDate) }
+      }
+      where = { ...where, ...like }
+
       const orderValue: any = { [field]: order }
       const result = await repository.find({
         where,
@@ -165,7 +199,8 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions 
    * @returns 
    */
-  async readManyWithoutPagination(order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt', where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], manager?: EntityManager)
+  async readManyWithoutPagination(order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt', where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
+    fromCreatedDate?: Date, toCreatedDate?: Date, like?: { [key: string]: string }, manager?: EntityManager)
     : Promise<Result<Entity[]>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
@@ -176,6 +211,29 @@ export class Dao<Entity extends BaseEntity> {
       if (where) {
         where = this.parseFilter(where)
       }
+      if (like) {
+        like = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it]); return acc; }, {} as any)
+      } else {
+        like = {}
+      }
+      if (fromCreatedDate && toCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: Between(fromCreatedDate, toCreatedDate) }
+      } else if (fromCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: MoreThanOrEqual(fromCreatedDate) }
+      }
+      else if (toCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: LessThanOrEqual(toCreatedDate) }
+      }
+      where = { ...where, ...like }
       const orderValue: any = { [field]: order }
       const result = await repository.find({
         order: orderValue,
