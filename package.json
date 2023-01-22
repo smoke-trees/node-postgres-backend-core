@@ -1,6 +1,6 @@
 {
   "name": "@smoke-trees/postgres-backend",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Postgres Backend Core files",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
