@@ -27,6 +27,7 @@ const debugFormat = format.printf(info => {
 const wTransports = [
   new transports.Console({
     handleExceptions: true,
+    level: process.env.NODE_ENV === 'production' ? 'debug' : 'silly',
     format: process.env.NODE_ENV === 'production'
       ? format.combine(contextFormat(), format.timestamp(), format.json())
       : format.combine(contextFormat(), format.timestamp(), format.colorize(),

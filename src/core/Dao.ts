@@ -126,6 +126,25 @@ export class Dao<Entity extends BaseEntity> {
     return where
   }
 
+  parseForSort(field: keyof Entity, order: 'ASC' | 'DESC') {
+    const result: any = {};
+    let level = result;
+    const sortLevels = field.toString().split('.') || [];
+
+    for (let i = sortLevels.length - 1; i >= 0; i--) {
+      console.log(level)
+      const prop = sortLevels[i];
+      if (i === sortLevels.length - 1) {
+        level[prop] = order || 'ASC';
+      }
+      else {
+        let newLevel = { [prop]: level }
+        level = newLevel
+      }
+    }
+    return level
+  }
+
   /**
    * Read a paginated list of entities 
    * @param page Page number
@@ -175,7 +194,8 @@ export class Dao<Entity extends BaseEntity> {
       }
       where = { ...where, ...like }
 
-      const orderValue: any = { [field]: order }
+      const orderValue: any = this.parseForSort(field, order)
+      log.debug("Sort array calculated", 'readMany', { orderValue })
       const result = await repository.find({
         where,
         skip: (page - 1) * count,
@@ -234,7 +254,7 @@ export class Dao<Entity extends BaseEntity> {
         where = { ...where, createdAt: LessThanOrEqual(toCreatedDate) }
       }
       where = { ...where, ...like }
-      const orderValue: any = { [field]: order }
+      const orderValue: any = this.parseForSort(field, order)
       const result = await repository.find({
         order: orderValue,
         where
