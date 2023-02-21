@@ -6,7 +6,7 @@ export class DatabaseLogger implements Logger {
     log.debug(query, 'database/query', { parameters })
   }
   logQueryError(error: string | Error, query: string, parameters?: any[] | undefined, queryRunner?: QueryRunner | undefined) {
-    log.error(error instanceof Error ? error.message : error, 'database/queryError', error, { query, parameters })
+    log.error(error instanceof Error ? error.message : "Something went wrong", 'database/queryError', error, { query, parameters })
   }
   logQuerySlow(time: number, query: string, parameters?: any[] | undefined, queryRunner?: QueryRunner | undefined) {
     log.warn(query, 'database/schemaBuild', { time, query })
