@@ -108,7 +108,7 @@ export class Dao<Entity extends BaseEntity> {
     }
   }
 
-  private parseFilter(where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]): FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] {
+  parseFilter(where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]): FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] {
     if (where instanceof Array) {
       where.forEach(() => this.parseFilter(where))
     }
