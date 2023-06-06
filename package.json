@@ -1,6 +1,6 @@
 {
   "name": "@smoke-trees/postgres-backend",
-  "version": "1.0.22",
+  "version": "1.0.24",
   "description": "Postgres Backend Core files",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,14 +42,14 @@
     ]
   },
   "dependencies": {
-    "@smoke-trees/smoke-context": "^1.2.2",
+    "@smoke-trees/smoke-context": "^1.3.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "morgan": "^1.10.0",
     "pg": "^8.8.0",
-    "typeorm": "0.3.9",
+    "typeorm": "0.3.16",
     "winston": "^3.8.1"
   },
   "devDependencies": {

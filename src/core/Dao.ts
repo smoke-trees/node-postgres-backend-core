@@ -45,7 +45,7 @@ export class Dao<Entity extends BaseEntity> {
       return new Result(false, ErrorCode.Created, "Success in insert", result.identifiers[0].id)
     } catch (error) {
       log.error(`Error in inserting ${this.entityName}`, `${this.entityName}/insert`, error);
-      return new Result(false, ErrorCode.DatabaseError, 'Error in insert')
+      return new Result(true, ErrorCode.DatabaseError, 'Error in insert')
     }
   }
 
