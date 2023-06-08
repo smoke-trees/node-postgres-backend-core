@@ -2,7 +2,7 @@ import { FindOneOptions, FindOptionsWhere } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { IResult, Result, ResultWithCount, WithCount } from "./result";
 import { BaseEntity } from "./BaseEntity";
-import { Dao } from "./Dao";
+import { Dao, _QueryDeepPartialEntity } from "./Dao";
 
 export interface IService<Entity extends BaseEntity> {
   /**
@@ -73,7 +73,7 @@ export abstract class Service<Entity extends BaseEntity> implements IService<Ent
     const result = await this.dao.readManyWithoutPagination(order, field, where, fromCreatedDate, toCreatedDate, like)
     return new Result(result.status.error, result.status.code, result.message, result.result);
   }
-  async create(value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[],): Promise<Result<number | string | null>> {
+  async create(value: _QueryDeepPartialEntity<Entity> | _QueryDeepPartialEntity<Entity>[],): Promise<Result<number | string | null>> {
     const result = await this.dao.create(value)
     return new Result(result.status.error, result.status.code, result.message, result.result);
   }

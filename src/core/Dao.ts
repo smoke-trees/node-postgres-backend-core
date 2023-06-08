@@ -5,6 +5,10 @@ import { BaseEntity } from "./BaseEntity";
 import Database from "./database";
 import log from "./log";
 
+export type _QueryDeepPartialEntity<T> = {
+  [P in keyof T]?: (T[P] extends Array<infer U> ? Array<_QueryDeepPartialEntity<U>> : T[P] extends ReadonlyArray<infer U> ? ReadonlyArray<_QueryDeepPartialEntity<U>> : _QueryDeepPartialEntity<T[P]>) | (() => string);
+};
+
 
 export class Dao<Entity extends BaseEntity> {
   protected database: Database;
@@ -31,7 +35,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns 
    */
-  async create(value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[], manager?: EntityManager): Promise<Result<number | string>> {
+  async create(value: _QueryDeepPartialEntity<Entity> | _QueryDeepPartialEntity<Entity>[], manager?: EntityManager): Promise<Result<number | string>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
