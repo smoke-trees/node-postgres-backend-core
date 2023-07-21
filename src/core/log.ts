@@ -88,3 +88,4 @@ class CustomLogger {
 export const log = new CustomLogger(logger)
 
 export default log
+

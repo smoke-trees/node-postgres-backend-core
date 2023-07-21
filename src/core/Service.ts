@@ -1,4 +1,4 @@
-import { FindOneOptions, FindOptionsWhere } from "typeorm";
+import { FindManyOptions, FindOneOptions, FindOptions, FindOptionsWhere } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { IResult, Result, ResultWithCount, WithCount } from "./result";
 import { BaseEntity } from "./BaseEntity";
@@ -57,10 +57,16 @@ export abstract class Service<Entity extends BaseEntity> implements IService<Ent
     page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC',
     field?: keyof Entity, where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
     fromCreatedDate?: Date, toCreatedDate?: Date,
-    like?: { [key: string]: string }
+    like?: {
+      [key: string]: string,
+    },
+    options?: FindManyOptions<Entity>
   )
     : Promise<WithCount<Result<Entity[]>>> {
-    const result = await this.dao.readMany(page, count, order, field, where, fromCreatedDate, toCreatedDate, like)
+    const result = await this.dao.readMany(
+      page, count, order, field, where, fromCreatedDate, toCreatedDate, like,
+      options
+    )
     return new ResultWithCount(result.status.error, result.status.code, result.message, result.result, result.count ?? null);
   }
   async readManyWithoutPagination(

@@ -1,4 +1,4 @@
-import { Between, Entity, EntityManager, EntityTarget, FindOneOptions, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
+import { Between, Entity, EntityManager, EntityTarget, FindManyOptions, FindOneOptions, FindOptions, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { ErrorCode, WithCount, Result, ResultWithCount } from "./result";
 import { BaseEntity } from "./BaseEntity";
@@ -162,6 +162,7 @@ export class Dao<Entity extends BaseEntity> {
   async readMany(page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt',
     where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], fromCreatedDate?: Date, toCreatedDate?: Date,
     like?: { [key: string]: string },
+    options?: FindManyOptions<Entity>,
     manager?: EntityManager,
   ): Promise<WithCount<Result<Entity[]>>> {
     if (!manager) {
@@ -205,6 +206,7 @@ export class Dao<Entity extends BaseEntity> {
         skip: (page - 1) * count,
         take: count,
         order: orderValue,
+        ...options
       });
       log.debug("Successfully found", `${this.entityName}/readMany`, { page, count, orderValue, field });
       const totalCount = await repository.count({ where });
