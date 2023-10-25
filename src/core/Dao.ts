@@ -225,8 +225,13 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions 
    * @returns 
    */
-  async readManyWithoutPagination(order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt', where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
-    fromCreatedDate?: Date, toCreatedDate?: Date, like?: { [key: string]: string }, manager?: EntityManager)
+  async readManyWithoutPagination(
+    order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt',
+    where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
+    fromCreatedDate?: Date, toCreatedDate?: Date,
+    like?: { [key: string]: string },
+    options?: FindManyOptions<Entity>,
+    manager?: EntityManager)
     : Promise<Result<Entity[]>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
@@ -263,7 +268,8 @@ export class Dao<Entity extends BaseEntity> {
       const orderValue: any = this.parseForSort(field, order)
       const result = await repository.find({
         order: orderValue,
-        where
+        where,
+        ...options
       });
       if (result.length === 0) {
         log.debug("Find not found", `${this.entityName}/readManyWithoutPagination`, { order, field, where });
