@@ -10,7 +10,25 @@ import { ExampleControllerTest } from "./app/ExampleTests/controller.test";
 import { ExampleServiceTest } from "./app/ExampleTests/services.test";
 import { clearUserTable } from "./utils/clear-database.test";
 
-const settings = new Settings()
+class DataSettings extends Settings {
+  databaseType: 'postgres' | 'mysql';
+  dbPassword: string;
+  dbUser: string;
+  dbHost: string;
+  dbPort: string | undefined;
+  database: string;
+
+  constructor() {
+    super()
+    this.databaseType = 'postgres'
+    this.dbPassword = 'mysecretpassword'
+    this.dbUser = 'postges'
+    this.dbHost = 'localhost'
+    this.database = 'postgres'
+  }
+}
+
+const settings = new DataSettings()
 
 const database = new Database(settings)
 database.addEntity(User)

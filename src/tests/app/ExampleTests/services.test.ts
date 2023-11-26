@@ -28,19 +28,19 @@ export function ExampleServiceTest(database: Database, userService: UserService)
       for (let i = 0; i < 12; i++) {
         await userService.create({ name: 'Anshuman1' })
       }
-      const userRead1 = await userService.readMany()
+      const userRead1 = await userService.readMany({})
       assert.equal(userRead1.status.code, ErrorCode.Success)
       assert.isFalse(userRead1.status.error)
       assert.exists(userRead1.result)
       assert.equal(userRead1.result?.length, 10)
 
-      const userRead2 = await userService.readMany(2)
+      const userRead2 = await userService.readMany({ count: 2 })
       assert.equal(userRead2.status.code, ErrorCode.Success)
       assert.isFalse(userRead2.status.error)
       assert.exists(userRead2.result)
       assert.equal(userRead2.result?.length, 2)
 
-      const userRead3 = await userService.readManyWithoutPagination()
+      const userRead3 = await userService.readMany({ nonPaginated: true })
       assert.equal(userRead3.status.code, ErrorCode.Success)
       assert.isFalse(userRead3.status.error)
       assert.exists(userRead3.result)

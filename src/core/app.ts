@@ -30,7 +30,7 @@ export class Application extends RouteHandler {
    */
   constructor(settings: Settings, database: Database);
 
-  constructor(settings: Settings = new Settings(), db?: Database) {
+  constructor(settings: Settings, db?: Database) {
     const app = express()
     super(app)
     this.app = app
