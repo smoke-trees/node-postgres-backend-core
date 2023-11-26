@@ -36,3 +36,10 @@
 | c8                      | 7.12.0      |  <https://www.npmjs.com/package/c8>         |
 | standardx                      | 7.0.0      |  <https://www.npmjs.com/package/standardx>         |
 | typescript                      | 4.8.2     |  <https://www.npmjs.com/package/typescript>         |
+
+## Version 2
+
+Version 2 should have following things
+
+* Database should be seperate from main project and plugable
+* 

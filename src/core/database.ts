@@ -74,13 +74,13 @@ export class Database {
    */
   getConfig(): DataSourceOptions {
     const config: DataSourceOptions = {
-      type: 'postgres',
-      port: parseInt(this.settings.pgPort),
+      type: this.settings.databaseType as any,
+      port: parseInt(this.settings.database),
       name: this.settings.connectionName,
-      database: this.settings.pgDatabase,
-      host: this.settings.pgHost,
-      username: this.settings.pgUser,
-      password: this.settings.pgPassword,
+      database: this.settings.database,
+      host: this.settings.dbHost,
+      username: this.settings.dbUser,
+      password: this.settings.dbPassword,
       entities: this.entities,
       migrations: this.migrations,
       synchronize: this.settings.syncDatabase,
