@@ -131,12 +131,19 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
         toCreatedDateDate = undefined
       }
     }
+
     let result
-    if (nonPaginated?.toString() === 'true') {
-      result = await this.service.readManyWithoutPagination(orderParsed as 'ASC' | "DESC", orderBy?.toString() as keyof Entity, filter as any, fromCreatedDateDate, toCreatedDateDate, like as any)
-    } else {
-      result = await this.service.readMany(pageNumberParsed, countParsed, orderParsed as 'ASC' | "DESC", orderBy?.toString() as keyof Entity, filter as any, fromCreatedDateDate, toCreatedDateDate, like as any)
-    }
+    result = await this.service.readMany({
+      page: pageNumberParsed,
+      count: countParsed,
+      order: orderParsed as 'ASC' | "DESC",
+      field: orderBy?.toString() as keyof BaseEntity,
+      where: filter as any,
+      fromCreatedDate: fromCreatedDateDate,
+      toCreatedDate: toCreatedDateDate,
+      like: like as any
+    })
+
     res.setHeader("X-Count", result.result?.length ?? 0)
     res.status(result.getStatus()).json(result)
   }
