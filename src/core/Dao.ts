@@ -48,10 +48,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns 
    */
-  async create(
-    value: _QueryDeepPartialEntity<Entity> | _QueryDeepPartialEntity<Entity>[],
-    manager?: EntityManager
-  ): Promise<Result<number | string>> {
+  async create(value: _QueryDeepPartialEntity<Entity> | _QueryDeepPartialEntity<Entity>[], manager?: EntityManager): Promise<Result<number | string>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -75,10 +72,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions 
    * @returns Result with the entity 
    */
-  async read(
-    value: string | number | FindOneOptions<Entity>,
-    manager?: EntityManager
-  ): Promise<Result<Entity>> {
+  async read(value: string | number | FindOneOptions<Entity>, manager?: EntityManager): Promise<Result<Entity>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -110,11 +104,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns Result with the number of rows updated 
    */
-  async update(
-    id: string | number | FindOptionsWhere<Entity>,
-    values: QueryDeepPartialEntity<Entity>,
-    manager?: EntityManager
-  ): Promise<Result<number | null>> {
+  async update(id: string | number | FindOptionsWhere<Entity>, values: QueryDeepPartialEntity<Entity>, manager?: EntityManager): Promise<Result<number | null>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -137,7 +127,8 @@ export class Dao<Entity extends BaseEntity> {
 
   parseFilter(where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]): FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] {
     if (where instanceof Array) {
-      where.forEach(() => this.parseFilter(where))
+      where = where.map((it) => this.parseFilter(it)) as FindOptionsWhere<Entity>[]
+      return where
     }
     Object.keys(where).forEach(key => {
       if ((where as any)[key] instanceof Array) {
@@ -172,29 +163,22 @@ export class Dao<Entity extends BaseEntity> {
     return level
   }
 
-
-  async readMany(
-    {
-      page,
-      count,
-      order,
-      field,
-      where,
-      like,
-      fromCreatedDate,
-      toCreatedDate,
-      nonPaginated,
-      options
-    }: QueryOption<Entity>,
+  /**
+   * Read a paginated list of entities 
+   * @param page Page number
+   * @param count Number of entries in a page
+   * @param order Order in which the entries should be returned
+   * @param field Order field
+   * @param where Where condition
+   * @param manager EntityManager to be used for the operation (optional). Use only for transactions
+   * @returns Result with the list of entities
+   */
+  async readMany(page = 1, count = 10, order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt',
+    where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[], fromCreatedDate?: Date, toCreatedDate?: Date,
+    like?: { [key: string]: string },
+    options?: FindManyOptions<Entity>,
     manager?: EntityManager,
   ): Promise<WithCount<Result<Entity[]>>> {
-
-    order ??= "DESC"
-    field ??= "createdAt"
-    if (nonPaginated) {
-    }
-
-
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
@@ -231,26 +215,13 @@ export class Dao<Entity extends BaseEntity> {
 
       const orderValue: any = this.parseForSort(field, order)
       log.debug("Sort array calculated", 'readMany', { orderValue })
-      let result
-
-      if (nonPaginated) {
-        result = await repository.find({
-          where,
-          order: orderValue,
-          ...options
-        });
-
-      } else {
-        page ??= 1
-        count ??= 10
-        result = await repository.find({
-          where,
-          skip: (page - 1) * count,
-          take: count,
-          order: orderValue,
-          ...options
-        });
-      }
+      const result = await repository.find({
+        where,
+        skip: (page - 1) * count,
+        take: count,
+        order: orderValue,
+        ...options
+      });
       log.debug("Successfully found", `${this.entityName}/readMany`, { page, count, orderValue, field });
       const totalCount = await repository.count({ where });
       return new ResultWithCount(false, ErrorCode.Success, 'Success in readMany', result, totalCount)
@@ -260,6 +231,71 @@ export class Dao<Entity extends BaseEntity> {
     }
   }
 
+  /**
+   * Read a paginated list of entities
+   * @param order Order in which the entries should be returned
+   * @param field Order field 
+   * @param where Where condition 
+   * @param manager EntityManager to be used for the operation (optional). Use only for transactions 
+   * @returns 
+   */
+  async readManyWithoutPagination(
+    order: 'ASC' | 'DESC' = 'DESC', field: keyof Entity = 'createdAt',
+    where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
+    fromCreatedDate?: Date, toCreatedDate?: Date,
+    like?: { [key: string]: string },
+    options?: FindManyOptions<Entity>,
+    manager?: EntityManager)
+    : Promise<Result<Entity[]>> {
+    if (!manager) {
+      manager = (this.database.getConnection()).createEntityManager()
+    }
+    const repository = manager.getRepository(this.entity);
+
+    try {
+      if (where) {
+        where = this.parseFilter(where)
+      }
+      if (like) {
+        like = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it]); return acc; }, {} as any)
+      } else {
+        like = {}
+      }
+      if (fromCreatedDate && toCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: Between(fromCreatedDate, toCreatedDate) }
+      } else if (fromCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: MoreThanOrEqual(fromCreatedDate) }
+      }
+      else if (toCreatedDate && !(where instanceof Array)) {
+        if (!where) {
+          where = {}
+        }
+        where = { ...where, createdAt: LessThanOrEqual(toCreatedDate) }
+      }
+      where = { ...where, ...like }
+      const orderValue: any = this.parseForSort(field, order)
+      const result = await repository.find({
+        order: orderValue,
+        where,
+        ...options
+      });
+      if (result.length === 0) {
+        log.debug("Find not found", `${this.entityName}/readManyWithoutPagination`, { order, field, where });
+        return new Result(true, ErrorCode.NotFound, "Not found")
+      }
+      log.debug("Successfully found", `${this.entityName}/readManyWithoutPagination`, { order, field });
+      return new Result(false, ErrorCode.Success, 'Success in read many', result)
+    } catch (error) {
+      log.error("Error in reading", `${this.entityName}/readManyWithoutPagination`, error, { order, field });
+      return new Result(true, ErrorCode.DatabaseError, "Error in reading")
+    }
+  }
 
   /**
    * Delete entities
