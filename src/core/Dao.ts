@@ -205,11 +205,11 @@ export class Dao<Entity extends BaseEntity> {
         where = { ...where, createdAt: LessThanOrEqual(toCreatedDate) }
       }
       if (likeBehaviour === 'and') {
-        where = { ...where, ...like }
+        where = { ...where, ...parsedLike } as any
       } else if (likeBehaviour === 'or' && parsedLike instanceof Array) {
         where = parsedLike.map(a => { return { ...where, ...a } })
       } else {
-        where = { ...where, ...like }
+        where = { ...where, ...parsedLike } as any
       }
 
       const orderValue: any = this.parseForSort(field, order)
@@ -286,11 +286,11 @@ export class Dao<Entity extends BaseEntity> {
         where = { ...where, createdAt: LessThanOrEqual(toCreatedDate) }
       }
       if (likeBehaviour === 'and') {
-        where = { ...where, ...like }
+        where = { ...where, ...parsedLike } as any
       } else if (likeBehaviour === 'or' && parsedLike instanceof Array) {
         where = parsedLike.map(a => { return { ...where, ...a } })
       } else {
-        where = { ...where, ...like }
+        where = { ...where, ...parsedLike } as any
       }
       const orderValue: any = this.parseForSort(field, order)
       const result = await repository.find({
