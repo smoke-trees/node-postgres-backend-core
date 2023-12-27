@@ -6,4 +6,5 @@ export class UserDao extends Dao<User> {
   constructor(database: Database) {
     super(database, User, "user");
   }
+
 }

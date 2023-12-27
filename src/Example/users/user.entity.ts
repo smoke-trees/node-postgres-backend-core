@@ -16,6 +16,11 @@ export class User extends BaseUser implements IUser {
   @Documentation.addField({ type: "string", description: "Name of the user" })
   name!: string;
 
+  @Column('varchar', { name: 'address', length: 255 })
+  @Validator({ required: true, updatable: true })
+  @Documentation.addField({ type: "string", description: "Name of the user" })
+  address!: string;
+
 
   constructor(it?: Partial<IUser>) {
     super();

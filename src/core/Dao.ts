@@ -1,9 +1,9 @@
-import { Between, Entity, EntityManager, EntityTarget, FindManyOptions, FindOneOptions, FindOptions, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
+import { Between, EntityManager, EntityTarget, FindManyOptions, FindOneOptions, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { ErrorCode, WithCount, Result, ResultWithCount } from "./result";
 import { BaseEntity } from "./BaseEntity";
 import Database from "./database";
 import log from "./log";
+import { ErrorCode, Result, ResultWithCount, WithCount } from "./result";
 
 export type _QueryDeepPartialEntity<T> = {
   [P in keyof T]?: (T[P] extends Array<infer U> ? Array<_QueryDeepPartialEntity<U>> : T[P] extends ReadonlyArray<infer U> ? ReadonlyArray<_QueryDeepPartialEntity<U>> : _QueryDeepPartialEntity<T[P]>) | (() => string);
@@ -164,6 +164,7 @@ export class Dao<Entity extends BaseEntity> {
     like?: { [key: string]: string },
     options?: FindManyOptions<Entity>,
     manager?: EntityManager,
+    likeBehaviour: 'and' | 'or' = 'and'
   ): Promise<WithCount<Result<Entity[]>>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
@@ -174,10 +175,16 @@ export class Dao<Entity extends BaseEntity> {
       if (where) {
         where = this.parseFilter(where)
       }
-      if (like) {
-        like = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it]); return acc; }, {} as any)
+      let parsedLike: typeof like | (typeof like)[]
+      if (like && likeBehaviour === 'and') {
+        parsedLike = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it]); return acc; }, {} as any)
+      } else if (like && likeBehaviour === 'or') {
+        parsedLike = Object.keys(like).map((it) => ({ [it]: ILike((like as any)[it]) })) as any
+        if ((parsedLike?.length ?? 0) === 0) {
+          parsedLike = {}
+        }
       } else {
-        like = {}
+        parsedLike = {}
       }
 
       if (fromCreatedDate && toCreatedDate && !(where instanceof Array)) {
@@ -197,7 +204,13 @@ export class Dao<Entity extends BaseEntity> {
         }
         where = { ...where, createdAt: LessThanOrEqual(toCreatedDate) }
       }
-      where = { ...where, ...like }
+      if (likeBehaviour === 'and') {
+        where = { ...where, ...like }
+      } else if (likeBehaviour === 'or' && parsedLike instanceof Array) {
+        where = parsedLike.map(a => { return { ...where, ...a } })
+      } else {
+        where = { ...where, ...like }
+      }
 
       const orderValue: any = this.parseForSort(field, order)
       log.debug("Sort array calculated", 'readMany', { orderValue })
@@ -231,7 +244,9 @@ export class Dao<Entity extends BaseEntity> {
     fromCreatedDate?: Date, toCreatedDate?: Date,
     like?: { [key: string]: string },
     options?: FindManyOptions<Entity>,
-    manager?: EntityManager)
+    manager?: EntityManager,
+    likeBehaviour: 'and' | 'or' = 'and'
+  )
     : Promise<Result<Entity[]>> {
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
@@ -242,10 +257,16 @@ export class Dao<Entity extends BaseEntity> {
       if (where) {
         where = this.parseFilter(where)
       }
-      if (like) {
-        like = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it]); return acc; }, {} as any)
+      let parsedLike: typeof like | (typeof like)[]
+      if (like && likeBehaviour === 'and') {
+        parsedLike = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it]); return acc; }, {} as any)
+      } else if (like && likeBehaviour === 'or') {
+        parsedLike = Object.keys(like).map((it) => ({ [it]: ILike((like as any)[it]) })) as any
+        if ((parsedLike?.length ?? 0) === 0) {
+          parsedLike = {}
+        }
       } else {
-        like = {}
+        parsedLike = {}
       }
       if (fromCreatedDate && toCreatedDate && !(where instanceof Array)) {
         if (!where) {
@@ -264,7 +285,13 @@ export class Dao<Entity extends BaseEntity> {
         }
         where = { ...where, createdAt: LessThanOrEqual(toCreatedDate) }
       }
-      where = { ...where, ...like }
+      if (likeBehaviour === 'and') {
+        where = { ...where, ...like }
+      } else if (likeBehaviour === 'or' && parsedLike instanceof Array) {
+        where = parsedLike.map(a => { return { ...where, ...a } })
+      } else {
+        where = { ...where, ...like }
+      }
       const orderValue: any = this.parseForSort(field, order)
       const result = await repository.find({
         order: orderValue,

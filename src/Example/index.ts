@@ -14,6 +14,8 @@ const settings = new Settings()
 const database = new Database(settings)
 database.addEntity(User)
 
+database.connect()
+
 
 const app = new Application(settings, database)
 
