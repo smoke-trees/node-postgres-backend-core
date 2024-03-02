@@ -16,6 +16,7 @@ export interface QueryOption<E> {
   field?: keyof BaseEntity;
   where?: FindOptionsWhere<E> | FindOptionsWhere<E>[];
   like?: { [key: string]: string };
+  likeBehaviour?: 'and' | 'or',
   fromCreatedDate?: Date;
   toCreatedDate?: Date;
   nonPaginated?: boolean;
@@ -168,15 +169,27 @@ export class Dao<Entity extends BaseEntity> {
     return level
   }
 
-  parseForLike(like?: { [key: string]: string }) {
-    let likeParsed;
-    if (like) {
-      likeParsed = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it]); return acc; }, {} as any)
+  parseForLike(
+    like?: { [key: string]: string },
+    likeBehaviour: 'and' | 'or' = 'and',
+  ) {
+
+    let parsedLike: { [key: string]: string } | ({ [key: string]: string })[]
+
+    if (like && likeBehaviour === 'and') {
+      parsedLike = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it] as string); return acc; }, {} as any)
+    } else if (like && likeBehaviour === 'or') {
+      parsedLike = Object.keys(like).map((it) => ({ [it]: ILike((like as any)[it]) })) as any
+      if ((parsedLike?.length ?? 0) === 0) {
+        parsedLike = {}
+      }
     } else {
-      likeParsed = {}
+      parsedLike = {}
     }
-    return likeParsed
+
+    return parsedLike
   }
+
 
   parseForDates(
     field: keyof Entity,
@@ -207,6 +220,7 @@ export class Dao<Entity extends BaseEntity> {
   parseWhere(
     where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
     like?: { [key: string]: string },
+    likeBehaviour?: 'and' | 'or',
     fromCreatedDate?: Date,
     toCreatedDate?: Date,
   ) {
@@ -214,7 +228,6 @@ export class Dao<Entity extends BaseEntity> {
       where = this.parseFilter(where)
     }
 
-    const likeParsed = this.parseForLike(like)
 
 
     where = this.parseForDates(
@@ -224,10 +237,34 @@ export class Dao<Entity extends BaseEntity> {
       where
     )
 
-    where = { ...where, ...likeParsed }
+    const parsedLike = this.parseForLike(like, likeBehaviour)
+
+    where = this.mergeParseLikeWhere(
+      parsedLike,
+      like,
+      likeBehaviour,
+      where,
+    )
 
     return where
   }
+
+  mergeParseLikeWhere(
+    parsedLike: { [key: string]: string } | ({ [key: string]: string })[],
+    like?: { [key: string]: string },
+    likeBehaviour?: 'and' | 'or',
+    where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] = {}
+  ) {
+    if (likeBehaviour === 'and') {
+      where = { ...where, ...like }
+    } else if (likeBehaviour === 'or' && parsedLike instanceof Array) {
+      where = parsedLike.map(a => { return { ...where, ...a } }) as FindOptionsWhere<Entity>[]
+    } else {
+      where = { ...where, ...like }
+    }
+    return where
+  }
+
 
   /**
    * Read a paginated list of entities
@@ -241,17 +278,19 @@ export class Dao<Entity extends BaseEntity> {
    */
   async readMany(
     options: {
-      page: number,
-      count: number,
-      order: 'ASC' | 'DESC',
-      field: keyof Entity,
+      page?: number,
+      count?: number,
+      order?: 'ASC' | 'DESC',
+      field?: keyof Entity,
       where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
       fromCreatedDate?: Date, toCreatedDate?: Date,
       like?: { [key: string]: string },
+      likeBehaviour?: 'and' | 'or',
       dbOptions?: FindManyOptions<Entity>,
     },
     manager?: EntityManager,
   ): Promise<WithCount<Result<Entity[]>>> {
+
     let {
       page = 1,
       count = 10,
@@ -261,6 +300,7 @@ export class Dao<Entity extends BaseEntity> {
       fromCreatedDate,
       toCreatedDate,
       like,
+      likeBehaviour = 'and',
       dbOptions
     } = options
     if (!manager) {
@@ -273,6 +313,7 @@ export class Dao<Entity extends BaseEntity> {
       const parsedWhere = this.parseWhere(
         where,
         like,
+        likeBehaviour,
         fromCreatedDate,
         toCreatedDate,
       )
@@ -307,11 +348,12 @@ export class Dao<Entity extends BaseEntity> {
    */
   async readManyWithoutPagination(
     options: {
-      order: 'ASC' | 'DESC',
-      field: keyof Entity,
+      order?: 'ASC' | 'DESC',
+      field?: keyof Entity,
       where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
       fromCreatedDate?: Date, toCreatedDate?: Date,
       like?: { [key: string]: string },
+      likeBehaviour?: 'and' | 'or',
       dbOptions?: FindManyOptions<Entity>,
     },
     manager?: EntityManager
@@ -323,6 +365,7 @@ export class Dao<Entity extends BaseEntity> {
       fromCreatedDate,
       toCreatedDate,
       like,
+      likeBehaviour = 'and',
       dbOptions
     } = options
     if (!manager) {
@@ -336,6 +379,7 @@ export class Dao<Entity extends BaseEntity> {
       const parsedWhere = this.parseWhere(
         where,
         like,
+        likeBehaviour,
         fromCreatedDate,
         toCreatedDate
       )

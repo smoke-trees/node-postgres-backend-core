@@ -1,13 +1,13 @@
-import { EntityManager, FindManyOptions, FindOneOptions, FindOptions, FindOptionsWhere } from "typeorm";
+import { EntityManager, FindOneOptions, FindOptionsWhere } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { IResult, Result, ResultWithCount, WithCount } from "./result";
 import { BaseEntity } from "./BaseEntity";
 import { Dao, QueryOption, _QueryDeepPartialEntity } from "./Dao";
+import { IResult, Result, ResultWithCount, WithCount } from "./result";
 
 
 export interface IService<Entity extends BaseEntity> {
   /**
-   * Get all entities 
+   * Get all entities
    * @param id ID of the entity to find
    */
   readOne(
@@ -15,7 +15,7 @@ export interface IService<Entity extends BaseEntity> {
     manager?: EntityManager
   ): Promise<IResult<Entity>>;
   /**
-   * Read Many 
+   * Read Many
    * @param page Page number to get
    * @param count Count of items to get
    * @param order Order to get items in
@@ -35,9 +35,9 @@ export interface IService<Entity extends BaseEntity> {
     manager?: EntityManager
   ): Promise<IResult<string | number | null>>;
   /**
-   * Update an entity in database 
+   * Update an entity in database
    * @param id id, where clause of the entity to update
-   * @param values values to update 
+   * @param values values to update
    */
   update(
     id: string | number | FindOptionsWhere<Entity>,
@@ -46,7 +46,7 @@ export interface IService<Entity extends BaseEntity> {
   ): Promise<Result<number | null>>;
 
   /**
-   * Delete an entity in database 
+   * Delete an entity in database
    * @param id id, where clause of the entity to delete
    */
   delete(
