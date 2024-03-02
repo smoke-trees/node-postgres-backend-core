@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import { User, UserService } from '../Example/users';
-import { Application } from "./app";
+import { ParsedQs } from 'qs';
 import { BaseEntity, BaseEntityConstructor, createEntity } from "./BaseEntity";
+import { Service } from "./Service";
+import { Application } from "./app";
 import { Controller, Methods } from './controller';
 import { Documentation } from './documentation/SmokeDocs';
 import { ErrorCode, Result } from './result';
-import { Service } from "./Service";
 
 export interface IServiceControllerPathOptions {
   read: boolean;
@@ -40,7 +40,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
   private EntityConstructor: BaseEntityConstructor<Entity>
 
   /**
-   * Create a controller for a service which has basic crud routes available 
+   * Create a controller for a service which has basic crud routes available
    * @param app Application Instance
    * @param entityConstructor Entity Constructor
    * @param service Service to be used
@@ -70,7 +70,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
     }
     if (this.optionsPath.readMany) {
       this.addRoutes({
-        handler: this.readAll.bind(this),
+        handler: this.readMany.bind(this),
         localMiddleware: localMiddlewares?.readMany ?? [],
         method: Methods.GET,
         path: '/'
@@ -102,28 +102,44 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
     }
   }
 
-  async readAll(req: Request, res: Response) {
-    const { orderBy, order, page, count, nonPaginated, fromCreatedDate, toCreatedDate, like, ...filter } = req.query
+  parseReadManyQuery(
+    query: ParsedQs
+  ) {
+    const {
+      orderBy,
+      order,
+      page,
+      count,
+      nonPaginated,
+      fromCreatedDate,
+      toCreatedDate,
+      like,
+      likeBehaviour,
+      ...filter
+    } = query
     let pageNumberParsed = parseInt(page?.toString() ?? '1')
     let countParsed = parseInt(count?.toString() ?? '10')
+    let fromCreatedDateDate
+    let toCreatedDateDate
+
+
+    let orderParsed: string = order?.toString()?.toUpperCase() ?? "DESC"
+
     if (isNaN(pageNumberParsed)) {
       pageNumberParsed = 1
     }
     if (isNaN(countParsed)) {
       countParsed = 10
     }
-    let orderParsed: string = order?.toString()?.toUpperCase() ?? "DESC"
     if (orderParsed !== 'DESC' && orderParsed !== 'ASC') {
       orderParsed = 'DESC'
     }
-    let fromCreatedDateDate
     if (fromCreatedDate) {
       fromCreatedDateDate = new Date(fromCreatedDate.toString())
       if (isNaN(fromCreatedDateDate.getTime())) {
         fromCreatedDateDate = undefined
       }
     }
-    let toCreatedDateDate
     if (toCreatedDate) {
       toCreatedDateDate = new Date(toCreatedDate.toString())
       toCreatedDateDate.setDate(toCreatedDateDate.getDate() + 1)
@@ -131,6 +147,35 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
         toCreatedDateDate = undefined
       }
     }
+
+    return {
+      pageNumberParsed,
+      countParsed,
+      orderParsed: orderParsed as 'ASC' | "DESC",
+      orderBy: orderBy?.toString() as keyof BaseEntity,
+      filter: filter as any,
+      fromCreatedDateDate,
+      toCreatedDateDate,
+      like: like as any
+
+    }
+
+  }
+
+
+  async readMany(req: Request, res: Response) {
+
+    const {
+      pageNumberParsed,
+      countParsed,
+      orderParsed,
+      orderBy,
+      filter,
+      fromCreatedDateDate,
+      toCreatedDateDate,
+      like,
+
+    } = this.parseReadManyQuery(req.query)
 
     let result
     result = await this.service.readMany({
@@ -179,8 +224,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
     const value = entity.validate(true, true, false)
     if (value.length > 0) {
       const result: Result<null> = new Result(
-        true,
-        ErrorCode.BadRequest,
+        true, ErrorCode.BadRequest,
         value.join(', '),
         null
       )
@@ -227,6 +271,7 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
           { name: 'order', in: 'query', description: 'Order: ASC or DESC', schema: { type: 'string' } },
           { name: 'page', in: 'query', description: 'Page number', schema: { type: 'integer', minimum: 1, default: 1 } },
           { name: 'count', in: 'query', description: 'Order by', schema: { type: 'integer', minimum: 1, default: 10 } },
+          { name: 'likeBehaviour', in: 'query', description: 'Like command', schema: { type: 'string', enum: ['or', 'and'] } },
         ],
         method: Methods.GET,
         path: `${this.path}`,
