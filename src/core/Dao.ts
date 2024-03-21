@@ -51,10 +51,14 @@ export interface QueryOption<E> {
    * Database options
    */
   dbOptions?: FindManyOptions<E>;
+
+  /**
+   * Non paginated
+   */
+  nonPaginated?: boolean;
 }
 
 export type ReadManyOption<E> = QueryOption<E>
-export type ReadManyWithoutPaginationOption<E> = Omit<QueryOption<E>, 'page' | 'count'>
 
 
 
@@ -285,10 +289,10 @@ export class Dao<Entity extends BaseEntity> {
     fromCreatedDate?: Date,
     toCreatedDate?: Date,
   ) {
+
     if (where) {
       where = this.parseFilter(where)
     }
-
 
 
     where = this.parseForDates(
@@ -345,12 +349,13 @@ export class Dao<Entity extends BaseEntity> {
       page = 1,
       count = 10,
       order = 'DESC',
-      field = 'creadtedAt' as keyof Entity,
+      field = 'createdAt' as keyof Entity,
       where,
       fromCreatedDate,
       toCreatedDate,
       like,
       likeBehaviour = 'and',
+      nonPaginated = false,
       dbOptions
     } = options
     if (!manager) {
@@ -369,15 +374,19 @@ export class Dao<Entity extends BaseEntity> {
       )
       const orderValue: any = this.parseForSort(field, order)
 
-      log.debug("Read many values", 'readMany', { orderValue, where })
+      log.debug("Read many values", 'readMany', { orderValue, parsedWhere })
 
-      const result = await repository.find({
+      const findOptions = {
         where: parsedWhere,
-        skip: (page - 1) * count,
-        take: count,
         order: orderValue,
         ...dbOptions
-      });
+      }
+      if (!nonPaginated) {
+        findOptions['skip'] = (page - 1) * count
+        findOptions['take'] = count
+      }
+
+      const result = await repository.find(findOptions);
 
       log.debug("Successfully found", `${this.entityName}/readMany`, { page, count, orderValue, field });
       const totalCount = await repository.count({ where });
@@ -385,64 +394,6 @@ export class Dao<Entity extends BaseEntity> {
     } catch (error) {
       log.error("Error in reading", `${this.entityName}/readMany`, error, { page, count, order, field });
       return new ResultWithCount(true, ErrorCode.DatabaseError, "Error in reading", null, null)
-    }
-  }
-
-  /**
-   * Read a paginated list of entities
-   * @param order Order in which the entries should be returned
-   * @param field Order field
-   * @param where Where condition
-   * @param manager EntityManager to be used for the operation (optional). Use only for transactions
-   * @returns
-   */
-  async readManyWithoutPagination(
-    options: ReadManyWithoutPaginationOption<Entity>,
-    manager?: EntityManager
-  ): Promise<Result<Entity[]>> {
-    let {
-      order = 'DESC',
-      field = 'createdAt' as keyof Entity,
-      where,
-      fromCreatedDate,
-      toCreatedDate,
-      like,
-      likeBehaviour = 'and',
-      dbOptions
-    } = options
-    if (!manager) {
-      manager = (this.database.getConnection()).createEntityManager()
-    }
-    const repository = manager.getRepository(this.entity);
-
-    try {
-
-
-      const parsedWhere = this.parseWhere(
-        where,
-        like,
-        likeBehaviour,
-        fromCreatedDate,
-        toCreatedDate
-      )
-      const orderValue: any = this.parseForSort(field, order)
-
-      log.debug("Read many values", 'readManyWithoutPagination', { orderValue, where })
-
-      const result = await repository.find({
-        order: orderValue,
-        where: parsedWhere,
-        ...dbOptions
-      });
-      if (result.length === 0) {
-        log.debug("Find not found", `${this.entityName}/readManyWithoutPagination`, { order, field, where });
-        return new Result(true, ErrorCode.NotFound, "Not found")
-      }
-      log.debug("Successfully found", `${this.entityName}/readManyWithoutPagination`, { order, field });
-      return new Result(false, ErrorCode.Success, 'Success in read many', result)
-    } catch (error) {
-      log.error("Error in reading", `${this.entityName}/readManyWithoutPagination`, error, { order, field });
-      return new Result(true, ErrorCode.DatabaseError, "Error in reading")
     }
   }
 
