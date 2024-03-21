@@ -6,17 +6,17 @@ import { clearUserTable } from "../../utils/clear-database.test";
 
 
 export function ExampleServiceTest(database: Database, userService: UserService) {
-  describe("User service test", async function () {
-    this.beforeEach(function () {
+  describe("User service test", async function() {
+    this.beforeEach(function() {
       clearUserTable(database)
     })
-    it("Should create a new User", async function () {
+    it("Should create a new User", async function() {
       const user = await userService.create({ name: 'Anshuman' })
       assert.equal(user.status.code, ErrorCode.Created)
       assert.isFalse(user.status.error)
       assert.exists(user.result)
     })
-    it("Should read a user", async function () {
+    it("Should read a user", async function() {
       const user = await userService.create({ name: 'Anshuman' })
       const userRead = await userService.readOne(user.result!)
       assert.equal(userRead.status.code, ErrorCode.Success)
@@ -24,7 +24,7 @@ export function ExampleServiceTest(database: Database, userService: UserService)
       assert.exists(userRead.result)
       assert.equal(userRead.result?.name, 'Anshuman')
     })
-    it("Should read all user", async function () {
+    it("Should read all user", async function() {
       for (let i = 0; i < 12; i++) {
         await userService.create({ name: 'Anshuman1' })
       }
@@ -46,7 +46,8 @@ export function ExampleServiceTest(database: Database, userService: UserService)
       assert.exists(userRead3.result)
       assert.equal(userRead3.result?.length, 12)
     })
-    it("Should update a user", async function () {
+
+    it("Should update a user", async function() {
       const user = await userService.create({ name: 'Anshuman' })
       const userUpdate = await userService.update(user.result!, { name: 'Anshuman1' })
       assert.equal(userUpdate.status.code, ErrorCode.Success)
@@ -58,7 +59,7 @@ export function ExampleServiceTest(database: Database, userService: UserService)
       assert.exists(userRead.result)
       assert.equal(userRead.result?.name, 'Anshuman1')
     })
-    it("Should delete a user", async function () {
+    it("Should delete a user", async function() {
       const user = await userService.create({ name: 'Anshuman' })
       const userDelete = await userService.delete(user.result!)
       assert.equal(userDelete.status.code, ErrorCode.Success)

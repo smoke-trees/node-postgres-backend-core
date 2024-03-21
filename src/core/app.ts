@@ -8,7 +8,7 @@ import { Settings } from './settings'
 
 /**
  * @class Application
- * 
+ *
  */
 export class Application extends RouteHandler {
   private readonly app: ExpressApplication
@@ -19,14 +19,15 @@ export class Application extends RouteHandler {
   public database: Database | null;
 
   /**
-   * Creates a Application which can run as a server 
+   * Creates a Application which can run as a server
    * @param settings Settings Object to be used by the application
    */
   constructor(settings: Settings);
+
   /**
-   * Creates a Application which can run as a server 
+   * Creates a Application which can run as a server
    * @param settings Settings Object to be used by the application
-   * @param database Database Object to be used by the application 
+   * @param database Database Object to be used by the application
    */
   constructor(settings: Settings, database: Database);
 
@@ -44,7 +45,7 @@ export class Application extends RouteHandler {
 
 
   /**
-   * Loads all the middlewares added to the application 
+   * Loads all the middlewares added to the application
    * @returns Returns the HTTP Server running the application
    */
   public async run(): Promise<Server> {
@@ -54,7 +55,7 @@ export class Application extends RouteHandler {
   }
 
   /**
-   * Loads all the middlewares added to the application 
+   * Loads all the middlewares added to the application
    * @returns Returns the express application
    */
   public getApp(): ExpressApplication {
@@ -73,15 +74,18 @@ export class Application extends RouteHandler {
   }
 
   /**
-   * Adds a controller to the application 
+   * Adds a controller to the application
    * @param controller Controller to be added to the application
    */
   public addController(controller: Controller): void {
+    if (controller.loadDocumentation) {
+      controller.loadDocumentation()
+    }
     this.controllers.push(controller)
   }
 
   /**
-   * Adds global middlewares to the application 
+   * Adds global middlewares to the application
    * @param middleware Middlewares to be added to the application
    */
   public addMiddleWare(...middleware: RequestHandler[]): void {

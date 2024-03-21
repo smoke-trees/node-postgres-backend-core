@@ -10,34 +10,70 @@ export type _QueryDeepPartialEntity<T> = {
 };
 
 export interface QueryOption<E> {
+  /**
+   * Page number
+   */
   page?: number;
+  /**
+   * Number of items per Page
+   */
   count?: number;
+  /**
+   * Order in which the entries should be returned
+   */
   order?: 'ASC' | 'DESC';
+  /**
+   * Field on which the order should be applied
+   */
   field?: keyof BaseEntity;
+  /**
+   * Where condition
+   */
   where?: FindOptionsWhere<E> | FindOptionsWhere<E>[];
+  /**
+   * Like Conditions
+   */
   like?: { [key: string]: string };
+  /**
+   * Like Behaviour
+   * @default 'and'
+   */
   likeBehaviour?: 'and' | 'or',
+  /**
+   * From Created Date
+   */
   fromCreatedDate?: Date;
+  /**
+   * To Created Date
+   */
   toCreatedDate?: Date;
-  nonPaginated?: boolean;
-  options?: FindManyOptions<E>;
+  /**
+   * Database options
+   */
+  dbOptions?: FindManyOptions<E>;
 }
 
+export type ReadManyOption<E> = QueryOption<E>
+export type ReadManyWithoutPaginationOption<E> = Omit<QueryOption<E>, 'page' | 'count'>
 
+
+
+export type Class<T> = {
+  new(): T;
+} | Function;
+
+/**
+ * Data Access Object for the entities
+ * @class getDao
+ * @param Entity Entity to be used for the getDao
+ * @param name Name of the entityName
+ * @returns Dao
+ */
 export class Dao<Entity extends BaseEntity> {
   protected database: Database;
   protected entity: EntityTarget<Entity>;
   protected entityName: string;
-  /**
-   * Get a Dao instance
-   * @param database Database Instance
-   * @param entity Entity Constructor
-   * @param name Name of the entity
-   * @returns Dao Instance
-   */
-  static getDao<T extends BaseEntity>(database: Database, entity: EntityTarget<T>, name: string) {
-    return new this(database, entity, name)
-  }
+
   constructor(database: Database, entity: EntityTarget<Entity>, name: string) {
     this.database = database
     this.entity = entity
@@ -126,6 +162,11 @@ export class Dao<Entity extends BaseEntity> {
     }
   }
 
+  /**
+   * Parses the filter values. It parses the values like true and false which
+   * comes from query params as string to boolean and also converts the array
+   * based filters to In
+   */
   parseFilter(where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]): FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] {
     if (where instanceof Array) {
       where = where.map((it) => this.parseFilter(it)) as FindOptionsWhere<Entity>[]
@@ -169,6 +210,12 @@ export class Dao<Entity extends BaseEntity> {
     return level
   }
 
+  /**
+   * Parses the like values. It parses the values to ILike for case insensitive
+   * search. It takes a likeBehaviour which can be 'and' or 'or'. This dictates
+   * how the like values are combined. If 'and' is passed, all the values are
+   * combined with AND. If 'or' is passed, all the values are combined with OR.
+   */
   parseForLike(
     like?: { [key: string]: string },
     likeBehaviour: 'and' | 'or' = 'and',
@@ -191,6 +238,13 @@ export class Dao<Entity extends BaseEntity> {
   }
 
 
+  /**
+   * Parses the date values. It parses the values to MoreThanOrEqual AND
+   * LessThanOrEqual for date range search. It takes a from and to 2024-03-21
+   * values. If both are passed, it combines them with Between. If only fromCreatedDate
+   * is passed, it uses MoreThanOrEqual. If only toCreatedDate is passed, it uses
+   * LessThanOrEqual.
+   */
   parseForDates(
     field: keyof Entity,
     from?: Date | string,
@@ -217,6 +271,13 @@ export class Dao<Entity extends BaseEntity> {
     return where
   }
 
+  /**
+   * Parses the where values. It combines all the values like where, like, fromCreatedDate
+   * and toCreatedDate to a single where object. It also takes a likeBehaviour which can
+   * be 'and' or 'or'. This dictates how the like values are combined. If 'and' is passed,
+   * all the values are combined with AND. If 'or' is passed, all the values are combined
+   * with OR.
+   */
   parseWhere(
     where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
     like?: { [key: string]: string },
@@ -249,6 +310,11 @@ export class Dao<Entity extends BaseEntity> {
     return where
   }
 
+  /**
+   * Merges the parsed like values with the where values. It takes a parsedLike
+   * which is the parsed like values, like which is the original like values, likeBehaviour
+   * which can be 'and' or 'or'.
+   */
   mergeParseLikeWhere(
     parsedLike: { [key: string]: string } | ({ [key: string]: string })[],
     like?: { [key: string]: string },
@@ -268,26 +334,10 @@ export class Dao<Entity extends BaseEntity> {
 
   /**
    * Read a paginated list of entities
-   * @param page Page number
-   * @param count Number of entries in a page
-   * @param order Order in which the entries should be returned
-   * @param field Order field
-   * @param where Where condition
-   * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns Result with the list of entities
    */
   async readMany(
-    options: {
-      page?: number,
-      count?: number,
-      order?: 'ASC' | 'DESC',
-      field?: keyof Entity,
-      where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
-      fromCreatedDate?: Date, toCreatedDate?: Date,
-      like?: { [key: string]: string },
-      likeBehaviour?: 'and' | 'or',
-      dbOptions?: FindManyOptions<Entity>,
-    },
+    options: ReadManyOption<Entity>,
     manager?: EntityManager,
   ): Promise<WithCount<Result<Entity[]>>> {
 
@@ -347,15 +397,7 @@ export class Dao<Entity extends BaseEntity> {
    * @returns
    */
   async readManyWithoutPagination(
-    options: {
-      order?: 'ASC' | 'DESC',
-      field?: keyof Entity,
-      where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
-      fromCreatedDate?: Date, toCreatedDate?: Date,
-      like?: { [key: string]: string },
-      likeBehaviour?: 'and' | 'or',
-      dbOptions?: FindManyOptions<Entity>,
-    },
+    options: ReadManyWithoutPaginationOption<Entity>,
     manager?: EntityManager
   ): Promise<Result<Entity[]>> {
     let {

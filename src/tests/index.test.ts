@@ -22,7 +22,7 @@ class DataSettings extends Settings {
     super()
     this.databaseType = 'postgres'
     this.dbPassword = 'mysecretpassword'
-    this.dbUser = 'postges'
+    this.dbUser = 'postgres'
     this.dbHost = 'localhost'
     this.database = 'postgres'
   }
@@ -32,6 +32,7 @@ const settings = new DataSettings()
 
 const database = new Database(settings)
 database.addEntity(User)
+
 const app = new Application(settings, database)
 
 app.addMiddleWare(morgan)
@@ -49,12 +50,12 @@ app.loadMiddleware()
 app.loadControllers()
 
 
-describe("Test Suite", function () {
-  before(async function () {
+describe("Test Suite", function() {
+  before(async function() {
     await database.connect()
     clearUserTable(database)
   });
-  after(function () { });
+  after(function() { });
 
   ExampleServiceTest(database, userService)
   ExampleControllerTest(app)

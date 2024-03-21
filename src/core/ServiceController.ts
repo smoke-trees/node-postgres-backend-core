@@ -47,7 +47,13 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
    * @param options Options for the controller
    * @param localMiddlewares Local middlewares for each path
    */
-  constructor(app: Application, entityConstructor: BaseEntityConstructor<Entity>, service: Service<Entity>, options?: IServiceControllerOptions, localMiddlewares?: ILocalMiddleware) {
+  constructor(
+    app: Application,
+    entityConstructor: BaseEntityConstructor<Entity>,
+    service: Service<Entity>,
+    options?: IServiceControllerOptions,
+    localMiddlewares?: ILocalMiddleware
+  ) {
     super(app)
     this.service = service
     this.optionsPath = {
@@ -156,8 +162,8 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
       filter: filter as any,
       fromCreatedDateDate,
       toCreatedDateDate,
-      like: like as any
-
+      like: like as any,
+      nonPaginated,
     }
 
   }
@@ -174,11 +180,24 @@ export abstract class ServiceController<Entity extends BaseEntity> extends Contr
       fromCreatedDateDate,
       toCreatedDateDate,
       like,
-
+      nonPaginated
     } = this.parseReadManyQuery(req.query)
 
-    let result
-    result = await this.service.readMany({
+    if (nonPaginated === 'true' && this.optionsPath.readManyWithoutPagination) {
+      const result = await this.service.readMany({
+        order: orderParsed as 'ASC' | "DESC",
+        field: orderBy?.toString() as keyof BaseEntity,
+        where: filter as any,
+        fromCreatedDate: fromCreatedDateDate,
+        toCreatedDate: toCreatedDateDate,
+        like: like as any
+      })
+      res.setHeader("X-Count", result.result?.length ?? 0)
+      res.status(result.getStatus()).json(result)
+      return
+    }
+
+    const result = await this.service.readMany({
       page: pageNumberParsed,
       count: countParsed,
       order: orderParsed as 'ASC' | "DESC",

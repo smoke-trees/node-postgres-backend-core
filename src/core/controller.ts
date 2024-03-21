@@ -1,8 +1,8 @@
-import { Router as ExpressRouter, Request, Response, NextFunction } from 'express'
-import { Application } from './app'
+import { Router as ExpressRouter, Request, Response, NextFunction } from 'express';
+import { Application } from './app';
 import log from './log';
 import { ErrorCode } from './result';
-import Router from './RouteHandler'
+import Router from './RouteHandler';
 
 // Methods Supported
 export const enum Methods {
@@ -16,18 +16,56 @@ export const enum Methods {
   ALL = 'all'
 }
 
+export type Handler = (req: Request, res: Response, next?: NextFunction) => void | Promise<void> | Promise<Response>;
+
 // Route Handler
 export interface Route {
+  /**
+   * Path on which the route will be mapped. The path is formed by
+   * combining the controller path and the route path
+   * @example /
+   * @example /:id
+   */
   path: string;
+  /**
+   * HTTP Method for the routes
+   * @example GET
+   * @example POST
+   * @example PUT
+   * @example DELETE
+   * @example PATCH
+   * @example OPTIONS
+   * @example HEAD
+   * @example ALL
+   */
   method: Methods;
+  /**
+   * Middleware to be used for this routes
+   * @example [authMiddleware]
+   */
   localMiddleware: ((req: Request, res: Response, next: NextFunction) => void)[];
-  handler: (req: Request, res: Response, next: NextFunction) => void | Promise<void>;
+  /**
+   * Handler for the routes. Bind the class to the handler always to ensure this
+   * is resolved always.
+   * @example this.handler.bind(this)
+   */
+  handler: Handler
 }
 
-// Controller Class
+
+export interface Controller {
+  loadDocumentation?(): void | Promise<void>;
+}
+
+/**
+ * Controller class which can be used to create routes and map them to the Server
+ */
 export abstract class Controller extends Router {
-  // Router instance for mapping routes
-  // The path on which this.routes will be mapped
+  /**
+   * Path on which the controller will be mapped. The path is formed by
+   * combining the controller path and the route path.
+   * @example /api
+   */
   public abstract path: string;
   // Array of objects which implement IRoutes interface
   private routes: Array<Route>;
@@ -37,7 +75,7 @@ export abstract class Controller extends Router {
   protected abstract controllers: Controller[];
 
   /**
-   * Creates a Controller which can be used to map routes 
+   * Creates a Controller which can be used to map routes
    * @param app Application instance
    */
   constructor(app: Application) {
@@ -48,11 +86,21 @@ export abstract class Controller extends Router {
     this.routes = []
   }
 
+  /**
+   * Add routes to the controllers
+   * @param routes Array of routes to be added to the controllers
+   * @example this.addRoutes({ path: '/', method: Methods.GET, localMiddleware: [], handler: this.handler.bind(this) })
+   * @example this.addRoutes({ path: '/:id', method: Methods.GET, localMiddleware: [], handler: this.handler.bind(this) })
+   */
   addRoutes(...routes: Route[]) {
     this.routes = [...routes, ...this.routes]
   }
 
-  private handleException(handler: (req: Request, res: Response, next: NextFunction) => Promise<void> | void) {
+  /**
+   * Add a wrapper around the handler to catch exceptions
+   * This ensures the server always responds with an error
+   */
+  public handleException(handler: Handler) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
         await handler(req, res, next)
@@ -65,8 +113,9 @@ export abstract class Controller extends Router {
     }
 
   }
+
   /**
-   * Loads all the routes added to the controller 
+   * Loads all the routes added to the controller
    * @returns Returns the express router
    */
   public setRoutes = (): ExpressRouter => {
@@ -109,5 +158,4 @@ export abstract class Controller extends Router {
     // Return router instance (will be usable in Server class)
     return this.router
   };
-  // public abstract loadDocumentation(): void;
 }
