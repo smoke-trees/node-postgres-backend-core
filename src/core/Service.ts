@@ -4,7 +4,6 @@ import { BaseEntity } from "./BaseEntity";
 import { Dao, QueryOption, _QueryDeepPartialEntity } from "./Dao";
 import { IResult, Result, ResultWithCount, WithCount } from "./result";
 
-
 export interface IService<Entity extends BaseEntity> {
   /**
    * Get all entities
@@ -24,12 +23,12 @@ export interface IService<Entity extends BaseEntity> {
    */
   readMany(
     options?: QueryOption<Entity>,
-    manager?: EntityManager,
+    manager?: EntityManager
   ): Promise<IResult<Entity[] | null>>;
   /**
-    * Create an entity in database
-    * @param value Value to create
-    */
+   * Create an entity in database
+   * @param value Value to create
+   */
   create(
     value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[],
     manager?: EntityManager
@@ -55,37 +54,53 @@ export interface IService<Entity extends BaseEntity> {
   ): Promise<Result<number | null>>;
 }
 
-export abstract class Service<Entity extends BaseEntity> implements IService<Entity> {
+export abstract class Service<Entity extends BaseEntity>
+  implements IService<Entity>
+{
   dao: Dao<Entity>;
 
   constructor(dao: Dao<Entity>) {
-    this.dao = dao
+    this.dao = dao;
   }
 
   async readOne(
     filter: string | number | FindOneOptions<Entity>,
     manager?: EntityManager
   ): Promise<Result<Entity | null>> {
-    const result = await this.dao.read(filter, manager)
-    return new Result(result.status.error, result.status.code, result.message, result.result);
+    const result = await this.dao.read(filter, manager);
+    return new Result(
+      result.status.error,
+      result.status.code,
+      result.message,
+      result.result
+    );
   }
 
   async readMany(
     options?: QueryOption<Entity>,
     manager?: EntityManager
-  )
-    : Promise<WithCount<Result<Entity[]>>> {
-    const result = await this.dao.readMany(options, manager)
-    return new ResultWithCount(result.status.error, result.status.code, result.message, result.result, result.count ?? null);
+  ): Promise<WithCount<Result<Entity[]>>> {
+    const result = await this.dao.readMany(options, manager);
+    return new ResultWithCount(
+      result.status.error,
+      result.status.code,
+      result.message,
+      result.result,
+      result.count ?? null
+    );
   }
 
   async create(
     value: _QueryDeepPartialEntity<Entity> | _QueryDeepPartialEntity<Entity>[],
     manager?: EntityManager
   ): Promise<Result<number | string | null>> {
-
-    const result = await this.dao.create(value, manager)
-    return new Result(result.status.error, result.status.code, result.message, result.result);
+    const result = await this.dao.create(value, manager);
+    return new Result(
+      result.status.error,
+      result.status.code,
+      result.message,
+      result.result
+    );
   }
 
   async update(
@@ -93,26 +108,35 @@ export abstract class Service<Entity extends BaseEntity> implements IService<Ent
     values: QueryDeepPartialEntity<Entity>,
     manager?: EntityManager
   ): Promise<Result<number | null>> {
-
-    let filter: string | number | FindOneOptions<Entity>
-    if (typeof id === 'string' || typeof id === 'number') {
-      filter = id
+    let filter: string | number | FindOneOptions<Entity>;
+    if (typeof id === "string" || typeof id === "number") {
+      filter = id;
     } else {
-      filter = { where: id }
+      filter = { where: id };
     }
-    const read = await this.readOne(filter)
+    const read = await this.readOne(filter);
     if (read.status.error) {
-      return new Result(true, read.status.code, read.message, 0)
+      return new Result(true, read.status.code, read.message, 0);
     }
-    const result = await this.dao.update(id, values, manager)
-    return new Result(result.status.error, result.status.code, result.message, result.result);
+    const result = await this.dao.update(id, values, manager);
+    return new Result(
+      result.status.error,
+      result.status.code,
+      result.message,
+      result.result
+    );
   }
 
   async delete(
     id: string | number | string[] | FindOptionsWhere<Entity>,
-    manager?: EntityManager,
+    manager?: EntityManager
   ): Promise<Result<number | null>> {
-    const result = await this.dao.delete(id, manager)
-    return new Result(result.status.error, result.status.code, result.message, result.result);
+    const result = await this.dao.delete(id, manager);
+    return new Result(
+      result.status.error,
+      result.status.code,
+      result.message,
+      result.result
+    );
   }
 }

@@ -21,7 +21,7 @@ export interface SchemaObject {
   nullable?: boolean;
   readonly?: boolean;
   writeOnly?: boolean;
-  example?: boolean | string| number| null;
+  example?: boolean | string | number | null;
   deprecated?: boolean;
   externalDocs?: ExternalDocumentation;
   $ref?: any;

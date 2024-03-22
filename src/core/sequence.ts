@@ -5,11 +5,11 @@ class Sequence {
   private _sequenceName: string;
 
   public get sequenceName(): string {
-    return this._sequenceName
+    return this._sequenceName;
   }
 
   public set sequenceName(value: string) {
-    this._sequenceName = value
+    this._sequenceName = value;
   }
 
   private _database: Database;
@@ -19,8 +19,8 @@ class Sequence {
    * @param name Name of the sequence
    */
   constructor(database: Database, sequenceName: string) {
-    this._database = database
-    this._sequenceName = sequenceName
+    this._database = database;
+    this._sequenceName = sequenceName;
   }
 
   /**
@@ -29,16 +29,16 @@ class Sequence {
    */
   async getNextValue(manager?: EntityManager): Promise<number> {
     if (!manager) {
-      manager = (this._database.getConnection()).createEntityManager()
+      manager = this._database.getConnection().createEntityManager();
     }
-    const query = `select nextval('${this._sequenceName}')`
+    const query = `select nextval('${this._sequenceName}')`;
 
-    const queryResult = await manager.query(query)
+    const queryResult = await manager.query(query);
 
     if (queryResult.length > 0) {
-      return parseInt(queryResult[0].nextval)
+      return parseInt(queryResult[0].nextval);
     }
-    return 0
+    return 0;
   }
 
   /**
@@ -47,17 +47,17 @@ class Sequence {
    */
   async getLastValue(manager?: EntityManager): Promise<number> {
     if (!manager) {
-      manager = (this._database.getConnection()).createEntityManager()
+      manager = this._database.getConnection().createEntityManager();
     }
-    const query = `select currval('${this._sequenceName}')`
+    const query = `select currval('${this._sequenceName}')`;
 
-    const queryResult = await manager.query(query)
+    const queryResult = await manager.query(query);
 
     if (queryResult.length > 0) {
-      return queryResult[0].currval
+      return queryResult[0].currval;
     }
-    return 0
+    return 0;
   }
 }
 
-export default Sequence
+export default Sequence;

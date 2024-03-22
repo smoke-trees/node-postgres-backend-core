@@ -1,20 +1,19 @@
 import { Documentation } from "./documentation/SmokeDocs";
 
 export enum ErrorCode {
-  Success = '200',
-  Created = '201',
-  BadRequest = '400',
-  NotAuthorized = '401',
-  NotFound = '404',
-  NoUpdatesPerformed = '405',
-  InternalServerError = '500',
-  DatabaseError = '500'
+  Success = "200",
+  Created = "201",
+  BadRequest = "400",
+  NotAuthorized = "401",
+  NotFound = "404",
+  NoUpdatesPerformed = "405",
+  InternalServerError = "500",
+  DatabaseError = "500",
 }
 
 export enum ErrorCode {
-  Test = 1
-};
-
+  Test = 1,
+}
 
 export interface IResult<T> {
   status: {
@@ -25,30 +24,29 @@ export interface IResult<T> {
   result?: T | null;
 }
 
-export type WithCount<T> = T & { count: number | null }
-
+export type WithCount<T> = T & { count: number | null };
 
 export class Result<T> implements IResult<T> {
-  status: { code: ErrorCode; error: boolean; };
+  status: { code: ErrorCode; error: boolean };
   message?: string;
-  result?: T | null
+  result?: T | null;
   /**
-   * Get the status code of the result 
+   * Get the status code of the result
    * @param error Error flag
    * @param code Error Code
    * @param message Message to return
-   * @param result Result for operation 
+   * @param result Result for operation
    */
   constructor(error: boolean, code: ErrorCode, message?: string, result?: T) {
     this.status = {
       code,
-      error
-    }
+      error,
+    };
     this.message = message;
-    this.result = result ?? null
+    this.result = result ?? null;
   }
   /**
-   * Get the status code of the result 
+   * Get the status code of the result
    * @returns Status Code
    */
   getStatus(): number {
@@ -68,13 +66,14 @@ export class Result<T> implements IResult<T> {
       case ErrorCode.DatabaseError:
       default:
         return 500;
-
     }
   }
 }
 
-export class ResultWithCount<T> extends Result<T> implements WithCount<IResult<T>> {
-
+export class ResultWithCount<T>
+  extends Result<T>
+  implements WithCount<IResult<T>>
+{
   count: number | null;
 
   /**
@@ -82,17 +81,23 @@ export class ResultWithCount<T> extends Result<T> implements WithCount<IResult<T
    * @param error Error flag
    * @param code Error Code
    * @param message Message to return
-   * @param result Result for operation 
+   * @param result Result for operation
    * @param count Count of items in result
    */
-  constructor(error: boolean, code: ErrorCode, message?: string, result?: T, count: number | null = null) {
-    super(error, code, message)
+  constructor(
+    error: boolean,
+    code: ErrorCode,
+    message?: string,
+    result?: T,
+    count: number | null = null
+  ) {
+    super(error, code, message);
     this.status = {
       code,
-      error
-    }
+      error,
+    };
     this.message = message;
-    this.result = result ?? null
-    this.count = count ?? null
+    this.result = result ?? null;
+    this.count = count ?? null;
   }
 }

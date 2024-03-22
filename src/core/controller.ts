@@ -1,22 +1,31 @@
-import { Router as ExpressRouter, Request, Response, NextFunction } from 'express';
-import { Application } from './app';
-import log from './log';
-import { ErrorCode } from './result';
-import Router from './RouteHandler';
+import {
+  Router as ExpressRouter,
+  Request,
+  Response,
+  NextFunction,
+} from "express";
+import { Application } from "./app";
+import log from "./log";
+import { ErrorCode } from "./result";
+import Router from "./RouteHandler";
 
 // Methods Supported
 export const enum Methods {
-  GET = 'get',
-  POST = 'post',
-  PUT = 'put',
-  DELETE = 'delete',
-  PATCH = 'patch',
-  OPTIONS = 'options',
-  HEAD = 'head',
-  ALL = 'all'
+  GET = "get",
+  POST = "post",
+  PUT = "put",
+  DELETE = "delete",
+  PATCH = "patch",
+  OPTIONS = "options",
+  HEAD = "head",
+  ALL = "all",
 }
 
-export type Handler = (req: Request, res: Response, next?: NextFunction) => void | Promise<void> | Promise<Response>;
+export type Handler = (
+  req: Request,
+  res: Response,
+  next?: NextFunction
+) => void | Promise<void> | Promise<Response>;
 
 // Route Handler
 export interface Route {
@@ -43,15 +52,18 @@ export interface Route {
    * Middleware to be used for this routes
    * @example [authMiddleware]
    */
-  localMiddleware: ((req: Request, res: Response, next: NextFunction) => void)[];
+  localMiddleware: ((
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => void)[];
   /**
    * Handler for the routes. Bind the class to the handler always to ensure this
    * is resolved always.
    * @example this.handler.bind(this)
    */
-  handler: Handler
+  handler: Handler;
 }
-
 
 export interface Controller {
   loadDocumentation?(): void | Promise<void>;
@@ -79,11 +91,11 @@ export abstract class Controller extends Router {
    * @param app Application instance
    */
   constructor(app: Application) {
-    super(ExpressRouter())
-    this.app = app
-    this.setMiddleware()
-    this.loadMiddleware()
-    this.routes = []
+    super(ExpressRouter());
+    this.app = app;
+    this.setMiddleware();
+    this.loadMiddleware();
+    this.routes = [];
   }
 
   /**
@@ -93,7 +105,7 @@ export abstract class Controller extends Router {
    * @example this.addRoutes({ path: '/:id', method: Methods.GET, localMiddleware: [], handler: this.handler.bind(this) })
    */
   addRoutes(...routes: Route[]) {
-    this.routes = [...routes, ...this.routes]
+    this.routes = [...routes, ...this.routes];
   }
 
   /**
@@ -103,15 +115,20 @@ export abstract class Controller extends Router {
   public handleException(handler: Handler) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
-        await handler(req, res, next)
+        await handler(req, res, next);
       } catch (error) {
-        log.error("Error in controller", Controller.name, error, {})
+        log.error("Error in controller", Controller.name, error, {});
         if (!res.headersSent) {
-          res.status(500).send({ status: { error: true, code: ErrorCode.InternalServerError }, message: "Internal Server Error", result: null })
+          res
+            .status(500)
+            .send({
+              status: { error: true, code: ErrorCode.InternalServerError },
+              message: "Internal Server Error",
+              result: null,
+            });
         }
       }
-    }
-
+    };
   }
 
   /**
@@ -124,38 +141,70 @@ export abstract class Controller extends Router {
     for (const route of this.routes) {
       switch (route.method) {
         case Methods.GET:
-          this.router.get(route.path, ...route.localMiddleware, this.handleException(route.handler))
-          break
+          this.router.get(
+            route.path,
+            ...route.localMiddleware,
+            this.handleException(route.handler)
+          );
+          break;
         case Methods.POST:
-          this.router.post(route.path, ...route.localMiddleware, this.handleException(route.handler))
-          break
+          this.router.post(
+            route.path,
+            ...route.localMiddleware,
+            this.handleException(route.handler)
+          );
+          break;
         case Methods.PUT:
-          this.router.put(route.path, ...route.localMiddleware, this.handleException(route.handler))
-          break
+          this.router.put(
+            route.path,
+            ...route.localMiddleware,
+            this.handleException(route.handler)
+          );
+          break;
         case Methods.DELETE:
-          this.router.delete(route.path, ...route.localMiddleware, this.handleException(route.handler))
-          break
+          this.router.delete(
+            route.path,
+            ...route.localMiddleware,
+            this.handleException(route.handler)
+          );
+          break;
         case Methods.PATCH:
-          this.router.patch(route.path, ...route.localMiddleware, this.handleException(route.handler))
-          break
+          this.router.patch(
+            route.path,
+            ...route.localMiddleware,
+            this.handleException(route.handler)
+          );
+          break;
         case Methods.HEAD:
-          this.router.head(route.path, ...route.localMiddleware, this.handleException(route.handler))
-          break
+          this.router.head(
+            route.path,
+            ...route.localMiddleware,
+            this.handleException(route.handler)
+          );
+          break;
         case Methods.OPTIONS:
-          this.router.options(route.path, ...route.localMiddleware, this.handleException(route.handler))
-          break
+          this.router.options(
+            route.path,
+            ...route.localMiddleware,
+            this.handleException(route.handler)
+          );
+          break;
         case Methods.ALL:
-          this.router.all(route.path, ...route.localMiddleware, this.handleException(route.handler))
-          break
+          this.router.all(
+            route.path,
+            ...route.localMiddleware,
+            this.handleException(route.handler)
+          );
+          break;
         default:
         // Throw exception
       }
     }
     for (const controllers of this.controllers) {
-      this.router.use(controllers.path, controllers.setRoutes())
+      this.router.use(controllers.path, controllers.setRoutes());
       // Throw exception
     }
     // Return router instance (will be usable in Server class)
-    return this.router
+    return this.router;
   };
 }

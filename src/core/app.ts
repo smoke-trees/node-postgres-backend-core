@@ -1,17 +1,20 @@
-import express, { Application as ExpressApplication, RequestHandler } from 'express'
-import { Server } from 'http'
-import log from './log'
-import { Controller } from './controller'
-import RouteHandler from './RouteHandler'
-import Database from './database'
-import { Settings } from './settings'
+import express, {
+  Application as ExpressApplication,
+  RequestHandler,
+} from "express";
+import { Server } from "http";
+import log from "./log";
+import { Controller } from "./controller";
+import RouteHandler from "./RouteHandler";
+import Database from "./database";
+import { Settings } from "./settings";
 
 /**
  * @class Application
  *
  */
 export class Application extends RouteHandler {
-  private readonly app: ExpressApplication
+  private readonly app: ExpressApplication;
   private readonly controllers: Controller[];
   protected readonly port: string;
   protected mw: RequestHandler[];
@@ -32,17 +35,16 @@ export class Application extends RouteHandler {
   constructor(settings: Settings, database: Database);
 
   constructor(settings: Settings, db?: Database) {
-    const app = express()
-    super(app)
-    this.app = app
-    this.settings = settings
-    this.port = process.env.PORT || '8080'
-    this.controllers = []
-    this.mw = []
-    this.setMiddleware()
-    this.database = db ?? null
+    const app = express();
+    super(app);
+    this.app = app;
+    this.settings = settings;
+    this.port = process.env.PORT || "8080";
+    this.controllers = [];
+    this.mw = [];
+    this.setMiddleware();
+    this.database = db ?? null;
   }
-
 
   /**
    * Loads all the middlewares added to the application
@@ -50,8 +52,8 @@ export class Application extends RouteHandler {
    */
   public async run(): Promise<Server> {
     return this.app.listen(this.port, () => {
-      log.info(`Started server on port ${this.port}`, 'Application.run')
-    })
+      log.info(`Started server on port ${this.port}`, "Application.run");
+    });
   }
 
   /**
@@ -59,7 +61,7 @@ export class Application extends RouteHandler {
    * @returns Returns the express application
    */
   public getApp(): ExpressApplication {
-    return this.app
+    return this.app;
   }
 
   /**
@@ -67,10 +69,16 @@ export class Application extends RouteHandler {
    */
   public loadControllers(): void {
     this.controllers.forEach((controller) => {
-      this.app.use(controller.path, controller.setRoutes())
-    })
-    this.app.get('/health', (req, res) => { res.status(209).json({ message: "Health is wealth. An apple a day keep doctors away." }) })
-    this.app.use('*', (req, res) => { res.status(404).json({ message: "Not Found" }) })
+      this.app.use(controller.path, controller.setRoutes());
+    });
+    this.app.get("/health", (req, res) => {
+      res.status(209).json({
+        message: "Health is wealth. An apple a day keep doctors away.",
+      });
+    });
+    this.app.use("*", (req, res) => {
+      res.status(404).json({ message: "Not Found" });
+    });
   }
 
   /**
@@ -79,9 +87,9 @@ export class Application extends RouteHandler {
    */
   public addController(controller: Controller): void {
     if (controller.loadDocumentation) {
-      controller.loadDocumentation()
+      controller.loadDocumentation();
     }
-    this.controllers.push(controller)
+    this.controllers.push(controller);
   }
 
   /**
@@ -89,6 +97,6 @@ export class Application extends RouteHandler {
    * @param middleware Middlewares to be added to the application
    */
   public addMiddleWare(...middleware: RequestHandler[]): void {
-    this.mw.push(...middleware)
+    this.mw.push(...middleware);
   }
 }

@@ -1,4 +1,4 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 import { ExternalDocumentation } from "./schema";
 
 export interface IContact {
@@ -9,7 +9,7 @@ export interface IContact {
 
 export interface ILicense {
   name?: string;
-  url?: string
+  url?: string;
 }
 
 export interface IInfoObject {
@@ -24,17 +24,15 @@ export interface IInfoObject {
 export interface Tag {
   name: string;
   description?: string;
-  externalDocs?: ExternalDocumentation
+  externalDocs?: ExternalDocumentation;
 }
 export interface ServerVariableObject {
   enum: string[];
-  default: string
+  default: string;
   description: string;
-
 }
 export interface ServerObject {
   url: string;
   description?: string;
   variables?: ServerVariableObject[];
 }
-

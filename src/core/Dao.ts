@@ -1,4 +1,15 @@
-import { Between, EntityManager, EntityTarget, FindManyOptions, FindOneOptions, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
+import {
+  Between,
+  EntityManager,
+  EntityTarget,
+  FindManyOptions,
+  FindOneOptions,
+  FindOptionsWhere,
+  ILike,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+} from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { BaseEntity } from "./BaseEntity";
 import Database from "./database";
@@ -6,7 +17,13 @@ import log from "./log";
 import { ErrorCode, Result, ResultWithCount, WithCount } from "./result";
 
 export type _QueryDeepPartialEntity<T> = {
-  [P in keyof T]?: (T[P] extends Array<infer U> ? Array<_QueryDeepPartialEntity<U>> : T[P] extends ReadonlyArray<infer U> ? ReadonlyArray<_QueryDeepPartialEntity<U>> : _QueryDeepPartialEntity<T[P]>) | (() => string);
+  [P in keyof T]?:
+    | (T[P] extends Array<infer U>
+        ? Array<_QueryDeepPartialEntity<U>>
+        : T[P] extends ReadonlyArray<infer U>
+          ? ReadonlyArray<_QueryDeepPartialEntity<U>>
+          : _QueryDeepPartialEntity<T[P]>)
+    | (() => string);
 };
 
 export interface QueryOption<E> {
@@ -21,7 +38,7 @@ export interface QueryOption<E> {
   /**
    * Order in which the entries should be returned
    */
-  order?: 'ASC' | 'DESC';
+  order?: "ASC" | "DESC";
   /**
    * Field on which the order should be applied
    */
@@ -38,7 +55,7 @@ export interface QueryOption<E> {
    * Like Behaviour
    * @default 'and'
    */
-  likeBehaviour?: 'and' | 'or',
+  likeBehaviour?: "and" | "or";
   /**
    * From Created Date
    */
@@ -58,13 +75,13 @@ export interface QueryOption<E> {
   nonPaginated?: boolean;
 }
 
-export type ReadManyOption<E> = QueryOption<E>
+export type ReadManyOption<E> = QueryOption<E>;
 
-
-
-export type Class<T> = {
-  new(): T;
-} | Function;
+export type Class<T> =
+  | {
+      new (): T;
+    }
+  | Function;
 
 /**
  * Data Access Object for the entities
@@ -79,9 +96,9 @@ export class Dao<Entity extends BaseEntity> {
   protected entityName: string;
 
   constructor(database: Database, entity: EntityTarget<Entity>, name: string) {
-    this.database = database
-    this.entity = entity
-    this.entityName = name
+    this.database = database;
+    this.entity = entity;
+    this.entityName = name;
   }
   /**
    * Create a new entity
@@ -89,21 +106,35 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns
    */
-  async create(value: _QueryDeepPartialEntity<Entity> | _QueryDeepPartialEntity<Entity>[], manager?: EntityManager): Promise<Result<number | string>> {
+  async create(
+    value: _QueryDeepPartialEntity<Entity> | _QueryDeepPartialEntity<Entity>[],
+    manager?: EntityManager
+  ): Promise<Result<number | string>> {
     if (!manager) {
-      manager = (this.database.getConnection()).createEntityManager()
+      manager = this.database.getConnection().createEntityManager();
     }
     const repository = manager.getRepository(this.entity);
     try {
       const result = await repository.insert(value);
       if (!(value instanceof Array)) {
-        value.id = result.identifiers[0].id ?? (result.identifiers[0] as [key: string])[0];
+        value.id =
+          result.identifiers[0].id ??
+          (result.identifiers[0] as [key: string])[0];
       }
       log.info("Successfully created", `${this.entityName}/create`, {});
-      return new Result(false, ErrorCode.Created, "Success in insert", result.identifiers[0].id)
+      return new Result(
+        false,
+        ErrorCode.Created,
+        "Success in insert",
+        result.identifiers[0].id
+      );
     } catch (error) {
-      log.error(`Error in inserting ${this.entityName}`, `${this.entityName}/insert`, error);
-      return new Result(true, ErrorCode.DatabaseError, 'Error in insert')
+      log.error(
+        `Error in inserting ${this.entityName}`,
+        `${this.entityName}/insert`,
+        error
+      );
+      return new Result(true, ErrorCode.DatabaseError, "Error in insert");
     }
   }
 
@@ -113,28 +144,33 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns Result with the entity
    */
-  async read(value: string | number | FindOneOptions<Entity>, manager?: EntityManager): Promise<Result<Entity>> {
+  async read(
+    value: string | number | FindOneOptions<Entity>,
+    manager?: EntityManager
+  ): Promise<Result<Entity>> {
     if (!manager) {
-      manager = (this.database.getConnection()).createEntityManager()
+      manager = this.database.getConnection().createEntityManager();
     }
     const repository = manager.getRepository(this.entity);
     try {
       let options: FindOneOptions;
       if (typeof value === "number" || typeof value === "string") {
-        options = { where: { id: value } }
+        options = { where: { id: value } };
       } else {
-        options = value
+        options = value;
       }
       const result = await repository.findOne(options);
       if (!result) {
         log.debug("Find not found", `${this.entityName}/read`, { id: value });
-        return new Result(true, ErrorCode.NotFound, 'Not found')
+        return new Result(true, ErrorCode.NotFound, "Not found");
       }
       log.debug("Successfully found", `${this.entityName}/read`, { id: value });
-      return new Result(false, ErrorCode.Success, "Success in read", result)
+      return new Result(false, ErrorCode.Success, "Success in read", result);
     } catch (error) {
-      log.error("Error in reading", `${this.update}/read`, error, { id: value });
-      return new Result(true, ErrorCode.DatabaseError, "Error in reading")
+      log.error("Error in reading", `${this.update}/read`, error, {
+        id: value,
+      });
+      return new Result(true, ErrorCode.DatabaseError, "Error in reading");
     }
   }
 
@@ -145,24 +181,40 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns Result with the number of rows updated
    */
-  async update(id: string | number | FindOptionsWhere<Entity>, values: QueryDeepPartialEntity<Entity>, manager?: EntityManager): Promise<Result<number | null>> {
+  async update(
+    id: string | number | FindOptionsWhere<Entity>,
+    values: QueryDeepPartialEntity<Entity>,
+    manager?: EntityManager
+  ): Promise<Result<number | null>> {
     if (!manager) {
-      manager = (this.database.getConnection()).createEntityManager()
+      manager = this.database.getConnection().createEntityManager();
     }
     const repository = manager.getRepository(this.entity);
     let copy = { ...values };
     try {
       const result = await repository.update(id, copy);
       if (result.affected === 0) {
-        log.debug("Update not found", `${this.entityName}/update`, { id, });
-        return new Result(true, ErrorCode.NotFound, "Not found")
+        log.debug("Update not found", `${this.entityName}/update`, { id });
+        return new Result(true, ErrorCode.NotFound, "Not found");
       }
-      log.debug("Successfully updated", `${this.entityName}/update`, { id, });
-      return new Result(false, ErrorCode.Success, 'Success in update', result.affected ?? null)
-
+      log.debug("Successfully updated", `${this.entityName}/update`, { id });
+      return new Result(
+        false,
+        ErrorCode.Success,
+        "Success in update",
+        result.affected ?? null
+      );
     } catch (error) {
-      log.error("Error in updating", `${this.entityName}/update`, error, { id, copy });
-      return new Result(true, ErrorCode.DatabaseError, "Error in updating", null)
+      log.error("Error in updating", `${this.entityName}/update`, error, {
+        id,
+        copy,
+      });
+      return new Result(
+        true,
+        ErrorCode.DatabaseError,
+        "Error in updating",
+        null
+      );
     }
   }
 
@@ -171,23 +223,27 @@ export class Dao<Entity extends BaseEntity> {
    * comes from query params as string to boolean and also converts the array
    * based filters to In
    */
-  parseFilter(where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]): FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] {
+  parseFilter(
+    where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[]
+  ): FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] {
     if (where instanceof Array) {
-      where = where.map((it) => this.parseFilter(it)) as FindOptionsWhere<Entity>[]
-      return where
+      where = where.map((it) =>
+        this.parseFilter(it)
+      ) as FindOptionsWhere<Entity>[];
+      return where;
     }
-    Object.keys(where).forEach(key => {
+    Object.keys(where).forEach((key) => {
       if ((where as any)[key] instanceof Array) {
-        (where as any)[key] = In((where as any)[key])
+        (where as any)[key] = In((where as any)[key]);
       }
-      if ((where as any)[key] === 'true') {
-        (where as any)[key] = true
+      if ((where as any)[key] === "true") {
+        (where as any)[key] = true;
       }
-      if ((where as any)[key] === 'false') {
-        (where as any)[key] = false
+      if ((where as any)[key] === "false") {
+        (where as any)[key] = false;
       }
-    })
-    return where
+    });
+    return where;
   }
 
   /**
@@ -195,23 +251,22 @@ export class Dao<Entity extends BaseEntity> {
    * syntax: { entity: {field: ASC }}
    *
    */
-  parseForSort(field: keyof Entity, order: 'ASC' | 'DESC') {
+  parseForSort(field: keyof Entity, order: "ASC" | "DESC") {
     const result: any = {};
     let level = result;
-    const sortLevels = field.toString().split('.') || [];
+    const sortLevels = field.toString().split(".") || [];
 
     for (let i = sortLevels.length - 1; i >= 0; i--) {
-      console.log(level)
+      console.log(level);
       const prop = sortLevels[i];
       if (i === sortLevels.length - 1) {
-        level[prop] = order || 'ASC';
-      }
-      else {
-        let newLevel = { [prop]: level }
-        level = newLevel
+        level[prop] = order || "ASC";
+      } else {
+        let newLevel = { [prop]: level };
+        level = newLevel;
       }
     }
-    return level
+    return level;
   }
 
   /**
@@ -222,25 +277,28 @@ export class Dao<Entity extends BaseEntity> {
    */
   parseForLike(
     like?: { [key: string]: string },
-    likeBehaviour: 'and' | 'or' = 'and',
+    likeBehaviour: "and" | "or" = "and"
   ) {
+    let parsedLike: { [key: string]: string } | { [key: string]: string }[];
 
-    let parsedLike: { [key: string]: string } | ({ [key: string]: string })[]
-
-    if (like && likeBehaviour === 'and') {
-      parsedLike = Object.keys(like).reduce((acc, it) => { acc[it] = ILike((like as any)[it] as string); return acc; }, {} as any)
-    } else if (like && likeBehaviour === 'or') {
-      parsedLike = Object.keys(like).map((it) => ({ [it]: ILike((like as any)[it]) })) as any
+    if (like && likeBehaviour === "and") {
+      parsedLike = Object.keys(like).reduce((acc, it) => {
+        acc[it] = ILike((like as any)[it] as string);
+        return acc;
+      }, {} as any);
+    } else if (like && likeBehaviour === "or") {
+      parsedLike = Object.keys(like).map((it) => ({
+        [it]: ILike((like as any)[it]),
+      })) as any;
       if ((parsedLike?.length ?? 0) === 0) {
-        parsedLike = {}
+        parsedLike = {};
       }
     } else {
-      parsedLike = {}
+      parsedLike = {};
     }
 
-    return parsedLike
+    return parsedLike;
   }
-
 
   /**
    * Parses the date values. It parses the values to MoreThanOrEqual AND
@@ -257,22 +315,21 @@ export class Dao<Entity extends BaseEntity> {
   ) {
     if (from && to && !(where instanceof Array)) {
       if (!where) {
-        where = {}
+        where = {};
       }
-      where = { ...where, [field]: Between(from, to) }
+      where = { ...where, [field]: Between(from, to) };
     } else if (from && !(where instanceof Array)) {
       if (!where) {
-        where = {}
+        where = {};
       }
-      where = { ...where, createdAt: MoreThanOrEqual(from) }
-    }
-    else if (to && !(where instanceof Array)) {
+      where = { ...where, createdAt: MoreThanOrEqual(from) };
+    } else if (to && !(where instanceof Array)) {
       if (!where) {
-        where = {}
+        where = {};
       }
-      where = { ...where, createdAt: LessThanOrEqual(to) }
+      where = { ...where, createdAt: LessThanOrEqual(to) };
     }
-    return where
+    return where;
   }
 
   /**
@@ -285,33 +342,26 @@ export class Dao<Entity extends BaseEntity> {
   parseWhere(
     where?: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
     like?: { [key: string]: string },
-    likeBehaviour?: 'and' | 'or',
+    likeBehaviour?: "and" | "or",
     fromCreatedDate?: Date,
-    toCreatedDate?: Date,
+    toCreatedDate?: Date
   ) {
-
     if (where) {
-      where = this.parseFilter(where)
+      where = this.parseFilter(where);
     }
 
-
     where = this.parseForDates(
-      'createdAt',
+      "createdAt",
       fromCreatedDate,
       toCreatedDate,
       where
-    )
+    );
 
-    const parsedLike = this.parseForLike(like, likeBehaviour)
+    const parsedLike = this.parseForLike(like, likeBehaviour);
 
-    where = this.mergeParseLikeWhere(
-      parsedLike,
-      like,
-      likeBehaviour,
-      where,
-    )
+    where = this.mergeParseLikeWhere(parsedLike, like, likeBehaviour, where);
 
-    return where
+    return where;
   }
 
   /**
@@ -320,21 +370,22 @@ export class Dao<Entity extends BaseEntity> {
    * which can be 'and' or 'or'.
    */
   mergeParseLikeWhere(
-    parsedLike: { [key: string]: string } | ({ [key: string]: string })[],
+    parsedLike: { [key: string]: string } | { [key: string]: string }[],
     like?: { [key: string]: string },
-    likeBehaviour?: 'and' | 'or',
+    likeBehaviour?: "and" | "or",
     where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] = {}
   ) {
-    if (likeBehaviour === 'and') {
-      where = { ...where, ...like }
-    } else if (likeBehaviour === 'or' && parsedLike instanceof Array) {
-      where = parsedLike.map(a => { return { ...where, ...a } }) as FindOptionsWhere<Entity>[]
+    if (likeBehaviour === "and") {
+      where = { ...where, ...like };
+    } else if (likeBehaviour === "or" && parsedLike instanceof Array) {
+      where = parsedLike.map((a) => {
+        return { ...where, ...a };
+      }) as FindOptionsWhere<Entity>[];
     } else {
-      where = { ...where, ...like }
+      where = { ...where, ...like };
     }
-    return where
+    return where;
   }
-
 
   /**
    * Read a paginated list of entities
@@ -342,58 +393,78 @@ export class Dao<Entity extends BaseEntity> {
    */
   async readMany(
     options?: ReadManyOption<Entity>,
-    manager?: EntityManager,
+    manager?: EntityManager
   ): Promise<WithCount<Result<Entity[]>>> {
-
     let {
       page = 1,
       count = 10,
-      order = 'DESC',
-      field = 'createdAt' as keyof Entity,
+      order = "DESC",
+      field = "createdAt" as keyof Entity,
       where,
       fromCreatedDate,
       toCreatedDate,
       like,
-      likeBehaviour = 'and',
+      likeBehaviour = "and",
       nonPaginated = false,
-      dbOptions
-    } = options ?? {}
+      dbOptions,
+    } = options ?? {};
     if (!manager) {
-      manager = (this.database.getConnection()).createEntityManager()
+      manager = this.database.getConnection().createEntityManager();
     }
     const repository = manager.getRepository(this.entity);
 
     try {
-
       const parsedWhere = this.parseWhere(
         where,
         like,
         likeBehaviour,
         fromCreatedDate,
-        toCreatedDate,
-      )
-      const orderValue: any = this.parseForSort(field, order)
+        toCreatedDate
+      );
+      const orderValue: any = this.parseForSort(field, order);
 
-      log.debug("Read many values", 'readMany', { orderValue, parsedWhere })
+      log.debug("Read many values", "readMany", { orderValue, parsedWhere });
 
       const findOptions = {
         where: parsedWhere,
         order: orderValue,
-        ...dbOptions
-      }
+        ...dbOptions,
+      };
       if (!nonPaginated) {
-        findOptions['skip'] = (page - 1) * count
-        findOptions['take'] = count
+        findOptions["skip"] = (page - 1) * count;
+        findOptions["take"] = count;
       }
 
       const result = await repository.find(findOptions);
 
-      log.debug("Successfully found", `${this.entityName}/readMany`, { page, count, orderValue, field });
+      log.debug("Successfully found", `${this.entityName}/readMany`, {
+        page,
+        count,
+        orderValue,
+        field,
+      });
       const totalCount = await repository.count({ where });
-      return new ResultWithCount(false, ErrorCode.Success, 'Success in readMany', result, totalCount)
+      return new ResultWithCount(
+        false,
+        ErrorCode.Success,
+        "Success in readMany",
+        result,
+        totalCount
+      );
     } catch (error) {
-      log.error("Error in reading", `${this.entityName}/readMany`, error, { page, count, order, field });
-      return new ResultWithCount(true, ErrorCode.DatabaseError, "Error in reading", null, null)
+      log.error("Error in reading", `${this.entityName}/readMany`, error, {
+        page,
+        count,
+        order,
+        field,
+      });
+      return new ResultWithCount(
+        true,
+        ErrorCode.DatabaseError,
+        "Error in reading",
+        null,
+        null
+      );
     }
   }
 
@@ -403,9 +474,12 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns
    */
-  async delete(id: string | number | string[] | FindOptionsWhere<Entity>, manager?: EntityManager): Promise<Result<number>> {
+  async delete(
+    id: string | number | string[] | FindOptionsWhere<Entity>,
+    manager?: EntityManager
+  ): Promise<Result<number>> {
     if (!manager) {
-      manager = (this.database.getConnection()).createEntityManager()
+      manager = this.database.getConnection().createEntityManager();
     }
     const repository = manager.getRepository(this.entity);
     try {
@@ -413,13 +487,25 @@ export class Dao<Entity extends BaseEntity> {
 
       if (result.affected === 0) {
         log.debug("Delete not found", `${this.entityName}/delete`, { id });
-        return new Result(true, ErrorCode.NotFound, 'Not found', result.affected)
+        return new Result(
+          true,
+          ErrorCode.NotFound,
+          "Not found",
+          result.affected
+        );
       }
       log.debug("Successfully deleted", `${this.entityName}/delete`, { id });
-      return new Result(false, ErrorCode.Success, 'Success in delete', result.affected ?? 0)
+      return new Result(
+        false,
+        ErrorCode.Success,
+        "Success in delete",
+        result.affected ?? 0
+      );
     } catch (error) {
-      log.error("Error in deleting", `${this.entityName}/delete`, error, { id });
-      return new Result(true, ErrorCode.DatabaseError, 'Error in deleting')
+      log.error("Error in deleting", `${this.entityName}/delete`, error, {
+        id,
+      });
+      return new Result(true, ErrorCode.DatabaseError, "Error in deleting");
     }
   }
 }
