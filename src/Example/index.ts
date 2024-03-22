@@ -1,13 +1,12 @@
 import { ContextProvider } from "@smoke-trees/smoke-context";
 import compression from "compression";
 import express from "express";
+import { User, UserController, UserDao, UserService } from "../Example/users";
 import { Application } from "../core/app";
 import Database from "../core/database";
 import { Documentation } from "../core/documentation/SmokeDocs";
 import morgan from "../core/morgan";
 import { Settings } from "../core/settings";
-import { User, UserController, UserDao, UserService } from "../Example/users";
-import { BaseUser } from "./users/baseUser";
 
 class DataSettings extends Settings {
   databaseType: "postgres" | "mysql";

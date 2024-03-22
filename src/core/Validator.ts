@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "reflect-metadata";
 export type ValidatorFunction = (value: any) => boolean;
 export interface ValidatorOptions {
@@ -15,6 +16,7 @@ export interface ValidatorOptions {
   updatable?: boolean;
 }
 
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 export function defaultValidator(value: any): boolean {
   return true;
 }
@@ -28,6 +30,8 @@ export function Validator(options?: ValidatorOptions) {
   const validatorOptions = options?.validatorFunction ?? defaultValidator;
   const required = options?.required ?? false;
   const updatable = options?.updatable ?? true;
+
+  /* eslint-disable-next-line @typescript-eslint/ban-types */
   return function (target: Object, propertyKey: string | symbol) {
     Reflect.defineMetadata(
       `smoke:${propertyKey.toString()}:validator`,

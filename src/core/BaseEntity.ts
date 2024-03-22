@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 export interface BaseEntityConstructor<T> {
@@ -48,7 +49,7 @@ export class BaseEntity {
     const metadataKeys = Reflect.getMetadataKeys(this);
     const issues: string[] = [];
     metadataKeys.forEach((key) => {
-      const [_, propertyName, type] = key.split(":");
+      const [, propertyName, type] = key.split(":");
       const value = (this as any)[propertyName];
       if (validator && type === "validator") {
         const validatorFunction = Reflect.getMetadata(key, this);

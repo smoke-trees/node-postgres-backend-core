@@ -65,10 +65,6 @@ export interface Route {
   handler: Handler;
 }
 
-export interface Controller {
-  loadDocumentation?(): void | Promise<void>;
-}
-
 /**
  * Controller class which can be used to create routes and map them to the Server
  */
@@ -119,13 +115,11 @@ export abstract class Controller extends Router {
       } catch (error) {
         log.error("Error in controller", Controller.name, error, {});
         if (!res.headersSent) {
-          res
-            .status(500)
-            .send({
-              status: { error: true, code: ErrorCode.InternalServerError },
-              message: "Internal Server Error",
-              result: null,
-            });
+          res.status(500).send({
+            status: { error: true, code: ErrorCode.InternalServerError },
+            message: "Internal Server Error",
+            result: null,
+          });
         }
       }
     };
@@ -207,4 +201,6 @@ export abstract class Controller extends Router {
     // Return router instance (will be usable in Server class)
     return this.router;
   };
+
+  loadDocumentation?(): void | Promise<void>;
 }

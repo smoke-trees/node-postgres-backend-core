@@ -45,7 +45,7 @@ export class SmokeDocs {
       if (!this.enabled) {
         return;
       }
-      let schema =
+      const schema =
         Reflect.getMetadata("smoke:schema", target) ?? ({} as SchemaObject);
       const copy = this.createDeepCopy(schema);
       this.schemas[target.name] = copy;
@@ -60,7 +60,7 @@ export class SmokeDocs {
       }
       this.refs[target.constructor.name] =
         `#/components/schemas/${target.constructor.name}`;
-      let schema =
+      const schema =
         Reflect.getMetadata("smoke:schema", target.constructor) ?? {};
       const copy = this.createDeepCopy(schema);
       copy.properties = copy.properties || {};

@@ -1,5 +1,3 @@
-import { Documentation } from "./documentation/SmokeDocs";
-
 export enum ErrorCode {
   Success = "200",
   Created = "201",
@@ -8,7 +6,6 @@ export enum ErrorCode {
   NotFound = "404",
   NoUpdatesPerformed = "405",
   InternalServerError = "500",
-  DatabaseError = "500",
 }
 
 export enum ErrorCode {
@@ -63,7 +60,6 @@ export class Result<T> implements IResult<T> {
       case ErrorCode.NotFound:
         return 404;
       case ErrorCode.InternalServerError:
-      case ErrorCode.DatabaseError:
       default:
         return 500;
     }

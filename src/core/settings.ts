@@ -2,7 +2,7 @@ import { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConne
 
 export interface ISettings {
   port: string;
-  connectionName: String;
+  connectionName: string;
   getValue(key: string, defaultValue?: string): string | undefined;
 }
 

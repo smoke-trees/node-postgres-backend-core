@@ -168,9 +168,12 @@ export abstract class ServiceController<
       countParsed,
       orderParsed: orderParsed as "ASC" | "DESC",
       orderBy: orderBy?.toString() as keyof BaseEntity,
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       filter: filter as any,
+      likeBehaviour: likeBehaviour,
       fromCreatedDateDate,
       toCreatedDateDate,
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       like: like as any,
       nonPaginated: nonPaginatedParsed,
     };
@@ -194,9 +197,11 @@ export abstract class ServiceController<
       count: countParsed,
       order: orderParsed as "ASC" | "DESC",
       field: orderBy?.toString() as keyof BaseEntity,
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       where: filter as any,
       fromCreatedDate: fromCreatedDateDate,
       toCreatedDate: toCreatedDateDate,
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       like: like as any,
       nonPaginated,
     });
@@ -227,6 +232,7 @@ export abstract class ServiceController<
         return;
       }
     }
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const response = await this.service.update(id, entity as any);
     res.status(response.getStatus()).json(response);
   }
@@ -244,6 +250,7 @@ export abstract class ServiceController<
       res.status(result.getStatus()).json(result);
       return;
     }
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const response = await this.service.create(entity as any);
     res.status(response.getStatus()).json(response);
   }

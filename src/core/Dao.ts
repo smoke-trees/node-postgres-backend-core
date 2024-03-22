@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-types */
 import {
   Between,
   EntityManager,
@@ -134,7 +136,7 @@ export class Dao<Entity extends BaseEntity> {
         `${this.entityName}/insert`,
         error
       );
-      return new Result(true, ErrorCode.DatabaseError, "Error in insert");
+      return new Result(true, ErrorCode.InternalServerError, "Error in insert");
     }
   }
 
@@ -170,7 +172,11 @@ export class Dao<Entity extends BaseEntity> {
       log.error("Error in reading", `${this.update}/read`, error, {
         id: value,
       });
-      return new Result(true, ErrorCode.DatabaseError, "Error in reading");
+      return new Result(
+        true,
+        ErrorCode.InternalServerError,
+        "Error in reading"
+      );
     }
   }
 
@@ -190,7 +196,7 @@ export class Dao<Entity extends BaseEntity> {
       manager = this.database.getConnection().createEntityManager();
     }
     const repository = manager.getRepository(this.entity);
-    let copy = { ...values };
+    const copy = { ...values };
     try {
       const result = await repository.update(id, copy);
       if (result.affected === 0) {
@@ -211,7 +217,7 @@ export class Dao<Entity extends BaseEntity> {
       });
       return new Result(
         true,
-        ErrorCode.DatabaseError,
+        ErrorCode.InternalServerError,
         "Error in updating",
         null
       );
@@ -262,7 +268,7 @@ export class Dao<Entity extends BaseEntity> {
       if (i === sortLevels.length - 1) {
         level[prop] = order || "ASC";
       } else {
-        let newLevel = { [prop]: level };
+        const newLevel = { [prop]: level };
         level = newLevel;
       }
     }
@@ -395,7 +401,7 @@ export class Dao<Entity extends BaseEntity> {
     options?: ReadManyOption<Entity>,
     manager?: EntityManager
   ): Promise<WithCount<Result<Entity[]>>> {
-    let {
+    const {
       page = 1,
       count = 10,
       order = "DESC",
@@ -460,7 +466,7 @@ export class Dao<Entity extends BaseEntity> {
       });
       return new ResultWithCount(
         true,
-        ErrorCode.DatabaseError,
+        ErrorCode.InternalServerError,
         "Error in reading",
         null,
         null
@@ -505,7 +511,11 @@ export class Dao<Entity extends BaseEntity> {
       log.error("Error in deleting", `${this.entityName}/delete`, error, {
         id,
       });
-      return new Result(true, ErrorCode.DatabaseError, "Error in deleting");
+      return new Result(
+        true,
+        ErrorCode.InternalServerError,
+        "Error in deleting"
+      );
     }
   }
 }

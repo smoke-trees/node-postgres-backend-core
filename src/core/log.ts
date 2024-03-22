@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createLogger, format, Logger, transports } from "winston";
 import { ContextProvider } from "@smoke-trees/smoke-context";
 

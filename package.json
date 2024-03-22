@@ -1,6 +1,6 @@
 {
   "name": "@smoke-trees/postgres-backend",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Postgres Backend Core files",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build-nolint": "tsc",
+    "lint": "eslint src/**/*.ts",
     "test": "NODE_OPTIONS=--enable-source-maps mocha --exit --file dist/tests/index.test.js",
     "test-w": "set NODE_OPTIONS=--enable-source-maps && set CI=true && mocha --exit dist/tests/index.test.js",
     "watch": "tsc -w",
