@@ -23,7 +23,7 @@ export interface IService<Entity extends BaseEntity> {
    * @param where where clause
    */
   readMany(
-    options: QueryOption<Entity>,
+    options?: QueryOption<Entity>,
     manager?: EntityManager,
   ): Promise<IResult<Entity[] | null>>;
   /**
@@ -71,7 +71,7 @@ export abstract class Service<Entity extends BaseEntity> implements IService<Ent
   }
 
   async readMany(
-    options: QueryOption<Entity>,
+    options?: QueryOption<Entity>,
     manager?: EntityManager
   )
     : Promise<WithCount<Result<Entity[]>>> {

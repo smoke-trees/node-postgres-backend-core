@@ -341,7 +341,7 @@ export class Dao<Entity extends BaseEntity> {
    * @returns Result with the list of entities
    */
   async readMany(
-    options: ReadManyOption<Entity>,
+    options?: ReadManyOption<Entity>,
     manager?: EntityManager,
   ): Promise<WithCount<Result<Entity[]>>> {
 
@@ -357,7 +357,7 @@ export class Dao<Entity extends BaseEntity> {
       likeBehaviour = 'and',
       nonPaginated = false,
       dbOptions
-    } = options
+    } = options ?? {}
     if (!manager) {
       manager = (this.database.getConnection()).createEntityManager()
     }
