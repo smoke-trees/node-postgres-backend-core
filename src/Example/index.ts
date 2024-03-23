@@ -20,7 +20,7 @@ class DataSettings extends Settings {
     super();
     this.databaseType = "postgres";
     this.dbPassword = "mysecretpassword";
-    this.dbUser = "postges";
+    this.dbUser = "postgres";
     this.dbHost = "localhost";
     this.database = "postgres";
   }
@@ -29,6 +29,8 @@ class DataSettings extends Settings {
 const settings = new DataSettings();
 const database = new Database(settings);
 database.addEntity(User);
+
+database.connect();
 
 const app = new Application(settings, database);
 

@@ -303,6 +303,8 @@ export class Dao<Entity extends BaseEntity> {
       parsedLike = {};
     }
 
+    console.log(parsedLike);
+
     return parsedLike;
   }
 
@@ -367,6 +369,8 @@ export class Dao<Entity extends BaseEntity> {
 
     where = this.mergeParseLikeWhere(parsedLike, like, likeBehaviour, where);
 
+    console.log(where, "here");
+
     return where;
   }
 
@@ -381,14 +385,15 @@ export class Dao<Entity extends BaseEntity> {
     likeBehaviour?: "and" | "or",
     where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] = {}
   ) {
+    console.log(parsedLike, like, likeBehaviour, where);
     if (likeBehaviour === "and") {
-      where = { ...where, ...like };
+      where = { ...where, ...(parsedLike as any) };
     } else if (likeBehaviour === "or" && parsedLike instanceof Array) {
       where = parsedLike.map((a) => {
         return { ...where, ...a };
       }) as FindOptionsWhere<Entity>[];
     } else {
-      where = { ...where, ...like };
+      where = { ...where, ...(parsedLike as any) };
     }
     return where;
   }

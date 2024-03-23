@@ -132,6 +132,13 @@ export abstract class ServiceController<
     let fromCreatedDateDate;
     let toCreatedDateDate;
 
+    let likeBehaviourParse: "and" | "or" | undefined = likeBehaviour
+      ?.toString()
+      ?.toLowerCase() as "and" | "or" | undefined;
+    if (likeBehaviourParse !== "or" && likeBehaviourParse !== "and") {
+      likeBehaviourParse = "and";
+    }
+
     let orderParsed: string = order?.toString()?.toUpperCase() ?? "DESC";
 
     if (isNaN(pageNumberParsed)) {
@@ -170,7 +177,7 @@ export abstract class ServiceController<
       orderBy: orderBy?.toString() as keyof BaseEntity,
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       filter: filter as any,
-      likeBehaviour: likeBehaviour,
+      likeBehaviour: likeBehaviourParse,
       fromCreatedDateDate,
       toCreatedDateDate,
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -190,6 +197,7 @@ export abstract class ServiceController<
       toCreatedDateDate,
       like,
       nonPaginated,
+      likeBehaviour,
     } = this.parseReadManyQuery(req.query);
 
     const result = await this.service.readMany({
@@ -204,6 +212,7 @@ export abstract class ServiceController<
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       like: like as any,
       nonPaginated,
+      likeBehaviour,
     });
 
     res.setHeader("X-Count", result.result?.length ?? 0);
