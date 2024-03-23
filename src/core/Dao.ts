@@ -263,7 +263,6 @@ export class Dao<Entity extends BaseEntity> {
     const sortLevels = field.toString().split(".") || [];
 
     for (let i = sortLevels.length - 1; i >= 0; i--) {
-      console.log(level);
       const prop = sortLevels[i];
       if (i === sortLevels.length - 1) {
         level[prop] = order || "ASC";
@@ -302,8 +301,6 @@ export class Dao<Entity extends BaseEntity> {
     } else {
       parsedLike = {};
     }
-
-    console.log(parsedLike);
 
     return parsedLike;
   }
@@ -369,8 +366,6 @@ export class Dao<Entity extends BaseEntity> {
 
     where = this.mergeParseLikeWhere(parsedLike, like, likeBehaviour, where);
 
-    console.log(where, "here");
-
     return where;
   }
 
@@ -385,7 +380,6 @@ export class Dao<Entity extends BaseEntity> {
     likeBehaviour?: "and" | "or",
     where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] = {}
   ) {
-    console.log(parsedLike, like, likeBehaviour, where);
     if (likeBehaviour === "and") {
       where = { ...where, ...(parsedLike as any) };
     } else if (likeBehaviour === "or" && parsedLike instanceof Array) {
