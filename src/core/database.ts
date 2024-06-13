@@ -84,7 +84,7 @@ export class Database {
   getConfig(): DataSourceOptions {
     const config: DataSourceOptions = {
       type: this.settings.databaseType as any,
-      port: parseInt(this.settings.database),
+      port: parseInt(this.settings.dbPort ?? ''),
       name: this.settings.connectionName,
       database: this.settings.database,
       host: this.settings.dbHost,
