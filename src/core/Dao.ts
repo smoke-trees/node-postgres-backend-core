@@ -20,12 +20,12 @@ import { ErrorCode, Result, ResultWithCount, WithCount } from "./result";
 
 export type _QueryDeepPartialEntity<T> = {
   [P in keyof T]?:
-    | (T[P] extends Array<infer U>
-        ? Array<_QueryDeepPartialEntity<U>>
-        : T[P] extends ReadonlyArray<infer U>
-          ? ReadonlyArray<_QueryDeepPartialEntity<U>>
-          : _QueryDeepPartialEntity<T[P]>)
-    | (() => string);
+  | (T[P] extends Array<infer U>
+    ? Array<_QueryDeepPartialEntity<U>>
+    : T[P] extends ReadonlyArray<infer U>
+    ? ReadonlyArray<_QueryDeepPartialEntity<U>>
+    : _QueryDeepPartialEntity<T[P]>)
+  | (() => string);
 };
 
 export interface QueryOption<E> {
@@ -81,8 +81,8 @@ export type ReadManyOption<E> = QueryOption<E>;
 
 export type Class<T> =
   | {
-      new (): T;
-    }
+    new(): T;
+  }
   | Function;
 
 /**
@@ -441,14 +441,13 @@ export class Dao<Entity extends BaseEntity> {
       }
 
       const result = await repository.find(findOptions);
-
       log.debug("Successfully found", `${this.entityName}/readMany`, {
         page,
         count,
         orderValue,
         field,
       });
-      const totalCount = await repository.count({ where });
+      const totalCount = await repository.count({ where: parsedWhere });
       return new ResultWithCount(
         false,
         ErrorCode.Success,
