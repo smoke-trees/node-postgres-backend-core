@@ -23,7 +23,7 @@ export interface IResult<T> {
 
 export type WithCount<T> = T & { count: number | null };
 
-export class Result<T> implements IResult<T> {
+export class Result<T=undefined> implements IResult<T> {
   status: { code: ErrorCode; error: boolean };
   message?: string;
   result?: T | null;
@@ -66,7 +66,7 @@ export class Result<T> implements IResult<T> {
   }
 }
 
-export class ResultWithCount<T>
+export class ResultWithCount<T=undefined>
   extends Result<T>
   implements WithCount<IResult<T>>
 {
