@@ -20,12 +20,12 @@ import { ErrorCode, Result, ResultWithCount, WithCount } from "./result";
 
 export type _QueryDeepPartialEntity<T> = {
   [P in keyof T]?:
-  | (T[P] extends Array<infer U>
-    ? Array<_QueryDeepPartialEntity<U>>
-    : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<_QueryDeepPartialEntity<U>>
-    : _QueryDeepPartialEntity<T[P]>)
-  | (() => string);
+    | (T[P] extends Array<infer U>
+        ? Array<_QueryDeepPartialEntity<U>>
+        : T[P] extends ReadonlyArray<infer U>
+          ? ReadonlyArray<_QueryDeepPartialEntity<U>>
+          : _QueryDeepPartialEntity<T[P]>)
+    | (() => string);
 };
 
 export interface QueryOption<E> {
@@ -81,8 +81,8 @@ export type ReadManyOption<E> = QueryOption<E>;
 
 export type Class<T> =
   | {
-    new(): T;
-  }
+      new (): T;
+    }
   | Function;
 
 /**
@@ -102,6 +102,7 @@ export class Dao<Entity extends BaseEntity> {
     this.entity = entity;
     this.entityName = name;
   }
+
   /**
    * Create a new entity
    * @param value Value to be inserted
