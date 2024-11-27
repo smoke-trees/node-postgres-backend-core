@@ -381,6 +381,9 @@ export class Dao<Entity extends BaseEntity> {
     likeBehaviour?: "and" | "or",
     where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[] = {}
   ) {
+    if (Array.isArray(where)) {
+      return where;
+    }
     if (likeBehaviour === "and") {
       where = { ...where, ...(parsedLike as any) };
     } else if (likeBehaviour === "or" && parsedLike instanceof Array) {
