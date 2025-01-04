@@ -3,7 +3,6 @@ import compression from "compression";
 import express from "express";
 import { Application } from "../core/app";
 import Database from "../core/database";
-import morgan from "../core/morgan";
 import { Settings } from "../core/settings";
 import { User, UserController, UserDao, UserService } from "../Example/users";
 import { ExampleControllerTest } from "./app/ExampleTests/controller.test";
@@ -35,7 +34,6 @@ database.addEntity(User);
 
 const app = new Application(settings, database);
 
-app.addMiddleWare(morgan);
 app.addMiddleWare(
   ContextProvider.getMiddleware({ headerName: "X-Request-ID" })
 );

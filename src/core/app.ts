@@ -8,6 +8,8 @@ import { Controller } from "./controller";
 import RouteHandler from "./RouteHandler";
 import Database from "./database";
 import { Settings } from "./settings";
+import { StLoggerMiddleware } from "./StLogger/StLogger.middleware";
+import { StLoggerDao } from "./StLogger/StLogger.dao";
 
 /**
  * @class Application
@@ -20,6 +22,7 @@ export class Application extends RouteHandler {
   protected mw: RequestHandler[];
   public settings: Settings;
   public database: Database | null;
+  protected readonly stLoggerDao?: StLoggerDao;
 
   /**
    * Creates a Application which can run as a server
@@ -44,6 +47,12 @@ export class Application extends RouteHandler {
     this.mw = [];
     this.setMiddleware();
     this.database = db ?? null;
+    if (db) {
+      this.stLoggerDao = new StLoggerDao(db);
+    }
+    this.app.use((req, res, next) =>
+      StLoggerMiddleware(req, res, next, this.stLoggerDao)
+    );
   }
 
   /**
@@ -71,7 +80,21 @@ export class Application extends RouteHandler {
     this.controllers.forEach((controller) => {
       this.app.use(controller.path, controller.setRoutes());
     });
-    this.app.get("/health", (req, res) => {
+    this.app.get("/health", async (req, res) => {
+      if (this.database && this.stLoggerDao) {
+        const healthRead = await this.stLoggerDao.readMany({
+          page: 1,
+          count: 1,
+          field: "id",
+          order: "DESC",
+        });
+        res.status(healthRead.status.error ? 500 : 209).json({
+          message:
+            healthRead.message ||
+            "Health is wealth. An apple a day keep doctors away.",
+        });
+        return;
+      }
       res.status(209).json({
         message: "Health is wealth. An apple a day keep doctors away.",
       });
