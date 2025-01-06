@@ -14,6 +14,7 @@ interface IStLogger {
   responseHeaders?: string;
   traceId?: string;
   sendData?: string;
+  userId?: string
 }
 
 @Entity({ name: "st_logger" })
@@ -54,6 +55,9 @@ export class StLogger extends BaseEntity implements IStLogger {
   @Column({ name: "send_data", type: "varchar", nullable: true })
   sendData?: string | undefined;
 
+  @Column({ name: "user_id", type: "varchar", nullable: true })
+  userId?: string | undefined;
+
   constructor(data?: IStLogger) {
     super();
     if (data) {
@@ -68,6 +72,7 @@ export class StLogger extends BaseEntity implements IStLogger {
       this.responseHeaders = data.responseHeaders;
       this.traceId = data.traceId;
       this.sendData = data.sendData;
+      this.userId = data.userId
     }
   }
 }

@@ -12,14 +12,15 @@ export function StLoggerMiddleware(
   try {
     const originalSend = res.send;
     let sendData = "";
-    res.send = function (data) {
+    res.send = function(data) {
       if (typeof data === "string") {
         sendData = data;
       }
       return originalSend.call(this, data);
     };
     res.on("finish", () => {
-      const traceId = ContextProvider.getContext().traceId;
+      const context = ContextProvider.getContext();
+      const traceId = context?.traceId
       const logValues = {
         status: res.statusCode,
         method: req.method,
@@ -35,6 +36,7 @@ export function StLoggerMiddleware(
         responseHeaders: JSON.stringify(res.getHeaders()),
         traceId,
         sendData,
+        userId: context?.values?.id || context?.values?.userId
       };
       if (logValues.method !== "GET" && stLoggerDao) {
         stLoggerDao.create(logValues);
