@@ -2,12 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import log from "../log";
 import { ContextProvider } from "@smoke-trees/smoke-context";
 import { StLoggerDao } from "./StLogger.dao";
+import { Settings } from "../settings";
 
 export function StLoggerMiddleware(
   req: Request,
   res: Response,
   next: NextFunction,
-  stLoggerDao?: StLoggerDao
+  stLoggerDao?: StLoggerDao,
+  setting?: Settings
 ) {
   try {
     const originalSend = res.send;
@@ -38,7 +40,7 @@ export function StLoggerMiddleware(
         sendData,
         userId: context?.values?.id || context?.values?.userId
       };
-      if (logValues.method !== "GET" && stLoggerDao) {
+      if (logValues.method !== "GET" && stLoggerDao && setting?.loggerEnable) {
         stLoggerDao.create(logValues);
       }
       log.info(

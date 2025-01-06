@@ -51,7 +51,7 @@ export class Application extends RouteHandler {
       this.stLoggerDao = new StLoggerDao(db);
     }
     this.app.use((req, res, next) =>
-      StLoggerMiddleware(req, res, next, this.stLoggerDao)
+      StLoggerMiddleware(req, res, next, this.stLoggerDao, settings)
     );
   }
 
