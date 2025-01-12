@@ -1,6 +1,6 @@
 {
   "name": "@smoke-trees/postgres-backend",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "Postgres Backend Core files",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,7 +42,7 @@
     ]
   },
   "dependencies": {
-    "@smoke-trees/smoke-context": "^1.4.8",
+    "@smoke-trees/smoke-context": "^1.5.3",
     "@types/express-serve-static-core": "^4.19.3",
     "@types/qs": "^6.9.15",
     "compression": "^1.7.4",
@@ -57,7 +57,7 @@
     "@types/chai": "^4.3.14",
     "@types/compression": "^1.7.5",
     "@types/cors": "^2.8.17",
-    "@types/express": "^4.21.2",
+    "@types/express": "^4.17.21",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
