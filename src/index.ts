@@ -23,7 +23,6 @@ export { Controller, Methods, Route } from "./core/controller";
 export { Database } from "./core/database";
 export { Documentation } from "./core/documentation/SmokeDocs";
 export { log } from "./core/log";
-export { morgan } from "./core/morgan";
 export {
   ErrorCode,
   IResult,

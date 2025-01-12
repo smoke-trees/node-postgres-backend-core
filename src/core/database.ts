@@ -9,13 +9,14 @@ import {
 import { DatabaseLogger } from "./DatabaseLogger";
 import log from "./log";
 import { Settings } from "./settings";
+import { StLogger } from "./StLogger/StLogger.entity";
 export class Database {
   private _connection!: DataSource;
   public get connection(): DataSource {
     return this._connection;
   }
   private _ready: Promise<boolean>;
-  private entities: MixedList<Function | string | EntitySchema> = [];
+  private entities: MixedList<Function | string | EntitySchema> = [StLogger];
   private migrations: MixedList<Function | string> = [];
   private settings: Settings;
   get ready(): Promise<boolean> {
@@ -84,7 +85,7 @@ export class Database {
   getConfig(): DataSourceOptions {
     const config: DataSourceOptions = {
       type: this.settings.databaseType as any,
-      port: parseInt(this.settings.dbPort ?? ''),
+      port: parseInt(this.settings.dbPort ?? ""),
       name: this.settings.connectionName,
       database: this.settings.database,
       host: this.settings.dbHost,

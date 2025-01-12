@@ -20,6 +20,7 @@ export abstract class Settings implements ISettings {
   syncDatabase: boolean;
   runMigrations: boolean;
   production: boolean;
+  loggerEnable: boolean
   databaseSettings: Partial<
     Omit<
       PostgresConnectionOptions,
@@ -40,6 +41,7 @@ export abstract class Settings implements ISettings {
   constructor() {
     this.production = this.getValue("NODE_ENV") === "production";
     this.port = this.getValue("PORT", "8080");
+    this.loggerEnable = this.getValue("LOGGER_ENABLE", "true").toLowerCase() === "true"
     this.interceptors = true;
     this.connectionName = "default";
     this.syncDatabase = this.production ? false : true;

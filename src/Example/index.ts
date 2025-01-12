@@ -5,7 +5,6 @@ import { User, UserController, UserDao, UserService } from "../Example/users";
 import { Application } from "../core/app";
 import Database from "../core/database";
 import { Documentation } from "../core/documentation/SmokeDocs";
-import morgan from "../core/morgan";
 import { Settings } from "../core/settings";
 
 class DataSettings extends Settings {
@@ -34,7 +33,6 @@ database.connect();
 
 const app = new Application(settings, database);
 
-app.addMiddleWare(morgan);
 app.addMiddleWare(
   ContextProvider.getMiddleware({ headerName: "X-Request-ID" })
 );
