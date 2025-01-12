@@ -201,8 +201,12 @@ export class Dao<Entity extends BaseEntity> {
     try {
       const result = await repository.update(id, copy);
       if (result.affected === 0) {
-        log.debug("Update not found", `${this.entityName}/update`, { id });
-        return new Result(true, ErrorCode.NotFound, "Not found");
+        log.debug("No rows updated", `${this.entityName}/update`, { id });
+        return new Result(
+          true,
+          ErrorCode.NoUpdatesPerformed,
+          "No updates performed"
+        );
       }
       log.debug("Successfully updated", `${this.entityName}/update`, { id });
       return new Result(
