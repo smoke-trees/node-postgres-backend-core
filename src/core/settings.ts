@@ -1,3 +1,4 @@
+import { config } from "dotenv";
 import { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConnectionOptions";
 
 export interface ISettings {
@@ -39,6 +40,7 @@ export abstract class Settings implements ISettings {
   >;
 
   constructor() {
+    config()
     this.production = this.getValue("NODE_ENV") === "production";
     this.port = this.getValue("PORT", "8080");
     this.loggerEnable = this.getValue("LOGGER_ENABLE", "true").toLowerCase() === "true"
