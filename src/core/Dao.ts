@@ -20,12 +20,12 @@ import { ErrorCode, Result, ResultWithCount, WithCount } from "./result";
 
 export type _QueryDeepPartialEntity<T> = {
   [P in keyof T]?:
-    | (T[P] extends Array<infer U>
-        ? Array<_QueryDeepPartialEntity<U>>
-        : T[P] extends ReadonlyArray<infer U>
-          ? ReadonlyArray<_QueryDeepPartialEntity<U>>
-          : _QueryDeepPartialEntity<T[P]>)
-    | (() => string);
+  | (T[P] extends Array<infer U>
+    ? Array<_QueryDeepPartialEntity<U>>
+    : T[P] extends ReadonlyArray<infer U>
+    ? ReadonlyArray<_QueryDeepPartialEntity<U>>
+    : _QueryDeepPartialEntity<T[P]>)
+  | (() => string);
 };
 
 export interface QueryOption<E> {
@@ -44,7 +44,7 @@ export interface QueryOption<E> {
   /**
    * Field on which the order should be applied
    */
-  field?: keyof BaseEntity;
+  field?: keyof BaseEntity | keyof E;
   /**
    * Where condition
    */
@@ -81,8 +81,8 @@ export type ReadManyOption<E> = QueryOption<E>;
 
 export type Class<T> =
   | {
-      new (): T;
-    }
+    new(): T;
+  }
   | Function;
 
 /**
