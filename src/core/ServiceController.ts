@@ -248,17 +248,7 @@ export abstract class ServiceController<
 
   async create(req: Request, res: Response) {
     const entity = createEntity<Entity>(this.EntityConstructor, req.body);
-    const value = entity.validate(true, true, false);
-    if (value.length > 0) {
-      const result: Result<null> = new Result(
-        true,
-        ErrorCode.BadRequest,
-        value.join(", "),
-        null
-      );
-      res.status(result.getStatus()).json(result);
-      return;
-    }
+
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const response = await this.service.create(entity as any);
     res.status(response.getStatus()).json(response);
