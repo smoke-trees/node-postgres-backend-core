@@ -14,7 +14,7 @@ export function StLoggerMiddleware(
   try {
     const originalSend = res.send;
     let sendData = "";
-    res.send = function(data) {
+    res.send = function (data) {
       if (typeof data === "string") {
         sendData = data;
       }
@@ -22,7 +22,7 @@ export function StLoggerMiddleware(
     };
     res.on("finish", () => {
       const context = ContextProvider.getContext();
-      const traceId = context?.traceId
+      const traceId = context?.traceId;
       const logValues = {
         status: res.statusCode,
         method: req.method,
@@ -38,7 +38,7 @@ export function StLoggerMiddleware(
         responseHeaders: JSON.stringify(res.getHeaders()),
         traceId,
         sendData,
-        userId: context?.values?.id || context?.values?.userId
+        userId: context?.values?.id || context?.values?.userId,
       };
       if (logValues.method !== "GET" && stLoggerDao && setting?.loggerEnable) {
         stLoggerDao.create(logValues);

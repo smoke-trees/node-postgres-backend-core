@@ -14,7 +14,7 @@ interface IStLogger {
   responseHeaders?: string;
   traceId?: string;
   sendData?: string;
-  userId?: string
+  userId?: string;
 }
 
 @Entity({ name: "st_logger" })
@@ -72,7 +72,7 @@ export class StLogger extends BaseEntity implements IStLogger {
       this.responseHeaders = data.responseHeaders;
       this.traceId = data.traceId;
       this.sendData = data.sendData;
-      this.userId = data.userId
+      this.userId = data.userId;
     }
   }
 }
