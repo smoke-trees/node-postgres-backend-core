@@ -40,8 +40,8 @@ export class SmokeDocs {
     this.openapi = version;
   }
 
-  addSchema(data: Partial<SchemaObject>) {
-    return (target: Function) => {
+  addSchema() {
+    return (target: NewableFunction) => {
       if (!this.enabled) {
         return;
       }
@@ -54,7 +54,7 @@ export class SmokeDocs {
   }
 
   public addField(data: SchemaObject) {
-    return (target: Object, propertyKey: string) => {
+    return (target: object, propertyKey: string) => {
       if (!this.enabled) {
         return;
       }
@@ -69,7 +69,7 @@ export class SmokeDocs {
     };
   }
 
-  public getRef(target: Function | string): string {
+  public getRef(target: NewableFunction | string): string {
     let name;
     if (typeof target === "string") {
       name = target;
@@ -79,7 +79,7 @@ export class SmokeDocs {
     return this.refs[name];
   }
 
-  public getSchema(target: Function | string): SchemaObject {
+  public getSchema(target: NewableFunction | string): SchemaObject {
     if (!this.enabled) {
       return {} as SchemaObject;
     }
@@ -122,6 +122,7 @@ export class SmokeDocs {
       };
     };
   }) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
     return (target?: Object | Function, operationId?: string) => {
       if (!this.enabled) {
         return {};

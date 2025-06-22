@@ -1,7 +1,7 @@
 import { BaseEntity } from "../../core/BaseEntity";
 import { Documentation } from "../../core/documentation/SmokeDocs";
 
-@Documentation.addSchema({ type: "object" })
+@Documentation.addSchema()
 export class BaseUser extends BaseEntity {
   @Documentation.addField({
     type: "string",

@@ -1,10 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { BaseEntity } from "../../core/BaseEntity";
-import { Documentation } from "../../core/documentation/SmokeDocs";
 import { Validator } from "../../core/Validator";
+import { Documentation } from "../../core/documentation/SmokeDocs";
 import { IUser } from "./IUser";
 
-@Documentation.addSchema({ type: "object" })
+@Documentation.addSchema()
 @Entity({ name: "address" })
 export class Address extends BaseEntity implements IUser {
   @PrimaryGeneratedColumn("increment", { name: "id" })

@@ -17,6 +17,7 @@ export interface SchemaObject {
   items?: SchemaObject;
   properties?: { [key: string]: SchemaObject };
   description?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   default?: any;
   nullable?: boolean;
   readonly?: boolean;
@@ -24,6 +25,7 @@ export interface SchemaObject {
   example?: boolean | string | number | null;
   deprecated?: boolean;
   externalDocs?: ExternalDocumentation;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   $ref?: any;
   title?: string;
   maximum?: number;
@@ -35,6 +37,7 @@ export interface SchemaObject {
   maxItems?: number;
   minItems?: number;
   required?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   enum?: (string | number | any)[];
 }
 
