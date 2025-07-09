@@ -22,6 +22,9 @@ export abstract class Settings implements ISettings {
   runMigrations: boolean;
   production: boolean;
   loggerEnable: boolean;
+  loggerCircuitBreakerCount: number;
+  loggerCircuitBreakerTime: number;
+  loggerCircuitBrokenTime: number;
   databaseSettings: Partial<
     Omit<
       PostgresConnectionOptions,
@@ -45,6 +48,9 @@ export abstract class Settings implements ISettings {
     this.port = this.getValue("PORT", "8080");
     this.loggerEnable =
       this.getValue("LOGGER_ENABLE", "true").toLowerCase() === "true";
+    this.loggerCircuitBreakerCount = 100;
+    this.loggerCircuitBreakerTime = 10 * 1000;
+    this.loggerCircuitBrokenTime = 60 * 60 * 1000; // minutes * seconds * milliseconds
     this.interceptors = true;
     this.connectionName = "default";
     this.syncDatabase = this.production ? false : true;

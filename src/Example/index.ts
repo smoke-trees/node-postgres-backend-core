@@ -2,11 +2,11 @@ import { ContextProvider } from "@smoke-trees/smoke-context";
 import compression from "compression";
 import express from "express";
 import { User, UserController, UserDao, UserService } from "../Example/users";
+import { enableLoggerCircuitBreaker } from "../core/StLogger/StLogger.middleware";
 import { Application } from "../core/app";
 import Database from "../core/database";
 import { Documentation } from "../core/documentation/SmokeDocs";
 import { Settings } from "../core/settings";
-
 class DataSettings extends Settings {
   databaseType: "postgres" | "mysql";
   dbPassword: string;
@@ -66,6 +66,8 @@ Documentation.addInfo({
 });
 
 console.log(JSON.stringify(Documentation.getAPIJson(), null, 2));
+
+enableLoggerCircuitBreaker(settings);
 
 app.loadMiddleware();
 app.loadControllers();

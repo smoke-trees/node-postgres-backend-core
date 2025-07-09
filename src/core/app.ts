@@ -3,13 +3,13 @@ import express, {
   RequestHandler,
 } from "express";
 import { Server } from "http";
-import log from "./log";
-import { Controller } from "./controller";
 import RouteHandler from "./RouteHandler";
-import Database from "./database";
-import { Settings } from "./settings";
-import { StLoggerMiddleware } from "./StLogger/StLogger.middleware";
 import { StLoggerDao } from "./StLogger/StLogger.dao";
+import { StLoggerMiddleware, cbCount } from "./StLogger/StLogger.middleware";
+import { Controller } from "./controller";
+import Database from "./database";
+import log from "./log";
+import { Settings } from "./settings";
 
 /**
  * @class Application
@@ -99,6 +99,27 @@ export class Application extends RouteHandler {
         message: "Health is wealth. An apple a day keep doctors away.",
       });
     });
+
+    this.app.get("/st-logger-status", async (_req, res) => {
+      return res
+        .status(200)
+        .json({ status: this.settings.loggerEnable, count: cbCount });
+    });
+
+    this.app.get("/st-logger-enable", async (_req, res) => {
+      this.settings.loggerEnable = true;
+      return res.status(200).json({ status: this.settings.loggerEnable });
+    });
+
+    this.app.get("/st-logger-disable", async (_req, res) => {
+      this.settings.loggerEnable = false;
+      return res.status(200).json({ status: this.settings.loggerEnable });
+    });
+
+    this.app.get("/test-circuit-breaker", async (_req, res) => {
+      return res.status(500).json({ status: this.settings.loggerEnable });
+    });
+
     this.app.use("*", (req, res) => {
       res.status(404).json({ message: "Not Found" });
     });

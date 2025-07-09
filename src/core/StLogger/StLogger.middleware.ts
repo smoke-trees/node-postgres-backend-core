@@ -1,8 +1,35 @@
+import { ContextProvider } from "@smoke-trees/smoke-context";
 import { NextFunction, Request, Response } from "express";
 import log from "../log";
-import { ContextProvider } from "@smoke-trees/smoke-context";
-import { StLoggerDao } from "./StLogger.dao";
 import { Settings } from "../settings";
+import { StLoggerDao } from "./StLogger.dao";
+
+export let cbCount = 0;
+let circuitBreakerEnabled = false;
+
+export function enableLoggerCircuitBreaker(
+  settings: Settings,
+  circuitBreakerCallback?: Function
+) {
+  if (circuitBreakerEnabled) {
+    return;
+  }
+  circuitBreakerEnabled = true;
+  if (settings.loggerEnable) {
+    setInterval(() => {
+      if (cbCount < settings.loggerCircuitBreakerCount) {
+        cbCount = 0;
+        return;
+      }
+
+      cbCount = 0;
+      settings.loggerEnable = false;
+      if (circuitBreakerCallback) {
+        circuitBreakerCallback();
+      }
+    }, settings.loggerCircuitBreakerTime);
+  }
+}
 
 export function StLoggerMiddleware(
   req: Request,
@@ -40,9 +67,21 @@ export function StLoggerMiddleware(
         sendData,
         userId: context?.values?.id || context?.values?.userId,
       };
-      if (logValues.method !== "GET" && stLoggerDao && setting?.loggerEnable) {
-        stLoggerDao.create(logValues);
+
+      // Code is bad for optimization reason. Talk to @achhapolia10 for more info.
+      if (setting?.loggerEnable) {
+        if (
+          (res.statusCode < 200 || res.statusCode > 399) &&
+          res.statusCode !== 404
+        ) {
+          if (stLoggerDao) {
+            console.log("count ++");
+            cbCount++;
+            stLoggerDao.create(logValues);
+          }
+        }
       }
+
       log.info(
         `Request ${req.method} ${req.originalUrl} from ${req.ip} with traceId ${traceId}, response: status: ${res.statusCode} content length: ${sendData.length}`
       );
