@@ -69,7 +69,7 @@ export interface QueryOption<E> {
   /**
    * Database options
    */
-  dbOptions?: FindManyOptions<E>;
+  dbOptions?: Omit<FindManyOptions<E>, "select">;
 
   /**
    * Non paginated
@@ -404,10 +404,10 @@ export class Dao<Entity extends BaseEntity> {
    * Read a paginated list of entities
    * @returns Result with the list of entities
    */
-  async readMany(
-    options?: ReadManyOption<Entity>,
+  async readMany<T extends keyof Entity>(
+    options?: ReadManyOption<Entity> & { dbOptions: {select: T[]} },
     manager?: EntityManager
-  ): Promise<WithCount<Result<Entity[]>>> {
+  ): Promise<WithCount<Result<Pick<Entity, T>[]>>> {
     const {
       page = 1,
       count = 10,
@@ -438,17 +438,27 @@ export class Dao<Entity extends BaseEntity> {
 
       log.debug("Read many values", "readMany", { orderValue, parsedWhere });
 
-      const findOptions = {
+      let hasSelect = false;
+      const selectObj: Record<keyof Entity, boolean> = {} as any;
+      if (options?.select && options.select.length > 0) {
+        hasSelect = true;
+        options.select.forEach((e) => (selectObj[e] = true));
+      }
+
+      const findOptions: FindManyOptions<Entity> = {
         where: parsedWhere,
         order: orderValue,
         ...dbOptions,
       };
+      if (hasSelect) {
+        findOptions.select = selectObj;
+      }
       if (!nonPaginated) {
         findOptions["skip"] = (page - 1) * count;
         findOptions["take"] = count;
       }
 
-      const result = await repository.find(findOptions);
+      const result: T[] = (await repository.find(findOptions)) as any;
       log.debug("Successfully found", `${this.entityName}/readMany`, {
         page,
         count,
