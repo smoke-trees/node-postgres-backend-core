@@ -6,6 +6,7 @@ import {
   EntityTarget,
   FindManyOptions,
   FindOneOptions,
+  FindOptionsRelations,
   FindOptionsSelect,
   FindOptionsWhere,
   ILike,
@@ -76,6 +77,8 @@ export interface QueryOption<
   dbOptions?: FindManyOptions<E>;
 
   select?: S;
+
+  relations?: FindOptionsRelations<E>;
   /**
    * Non paginated
    */
@@ -446,6 +449,7 @@ export class Dao<Entity extends BaseEntity> {
       fromCreatedDate,
       toCreatedDate,
       like,
+      relations,
       likeBehaviour = "and",
       nonPaginated = false,
       dbOptions,
@@ -472,13 +476,13 @@ export class Dao<Entity extends BaseEntity> {
         where: parsedWhere,
         order: orderValue,
         ...dbOptions,
+        select: select,
+        relations: relations,
       };
       if (!nonPaginated) {
         findOptions["skip"] = (page - 1) * count;
         findOptions["take"] = count;
       }
-
-      findOptions.select = select;
 
       const result = (await repository.find(findOptions)) as SelectedRead<
         Entity,
