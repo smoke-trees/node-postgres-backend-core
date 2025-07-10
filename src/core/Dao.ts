@@ -440,9 +440,9 @@ export class Dao<Entity extends BaseEntity> {
 
       let hasSelect = false;
       const selectObj: Record<keyof Entity, boolean> = {} as any;
-      if (options?.select && options.select.length > 0) {
+      if (options?.dbOptions?.select && options?.dbOptions?.select.length > 0) {
         hasSelect = true;
-        options.select.forEach((e) => (selectObj[e] = true));
+        options.dbOptions.select.forEach((e) => (selectObj[e] = true));
       }
 
       const findOptions: FindManyOptions<Entity> = {
@@ -458,7 +458,7 @@ export class Dao<Entity extends BaseEntity> {
         findOptions["take"] = count;
       }
 
-      const result: T[] = (await repository.find(findOptions)) as any;
+      const result: Pick<Entity, T>[] = await repository.find(findOptions);
       log.debug("Successfully found", `${this.entityName}/readMany`, {
         page,
         count,
