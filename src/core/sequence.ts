@@ -1,7 +1,7 @@
 import { EntityManager } from "typeorm";
 import Database from "./database";
 
-class Sequence {
+export class Sequence {
   private _sequenceName: string;
 
   public get sequenceName(): string {
