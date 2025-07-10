@@ -7,6 +7,10 @@ import { Application } from "../core/app";
 import Database from "../core/database";
 import { Documentation } from "../core/documentation/SmokeDocs";
 import { Settings } from "../core/settings";
+import { AddressController } from "./users/Address.controller";
+import { AddressDao } from "./users/Address.dao";
+import { AddressService } from "./users/Address.service";
+import { Address } from "./users/address.entity";
 class DataSettings extends Settings {
   databaseType: "postgres" | "mysql";
   dbPassword: string;
@@ -28,6 +32,7 @@ class DataSettings extends Settings {
 const settings = new DataSettings();
 const database = new Database(settings);
 database.addEntity(User);
+database.addEntity(Address);
 
 database.connect();
 
@@ -43,7 +48,12 @@ const userDao = new UserDao(database);
 const userService = new UserService(userDao);
 const userController = new UserController(app, userService);
 
+const addressDao = new AddressDao(database);
+const addressService = new AddressService(addressDao);
+const addressController = new AddressController(app, addressService);
+
 app.addController(userController);
+app.addController(addressController);
 
 Documentation.addServers([
   {
