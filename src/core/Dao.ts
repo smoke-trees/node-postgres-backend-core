@@ -405,7 +405,7 @@ export class Dao<Entity extends BaseEntity> {
    * @returns Result with the list of entities
    */
   async readMany<T extends keyof Entity>(
-    options?: ReadManyOption<Entity> & { dbOptions: {select: T[]} },
+    options?: ReadManyOption<Entity> & { dbOptions?: {select?: T[]} },
     manager?: EntityManager
   ): Promise<WithCount<Result<Pick<Entity, T>[]>>> {
     const {
@@ -451,7 +451,7 @@ export class Dao<Entity extends BaseEntity> {
         ...dbOptions,
       };
       if (hasSelect) {
-        findOptions.select = selectObj;
+        findOptions.select = selectObj as any;
       }
       if (!nonPaginated) {
         findOptions["skip"] = (page - 1) * count;

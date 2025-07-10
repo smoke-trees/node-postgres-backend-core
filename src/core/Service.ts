@@ -21,14 +21,13 @@ export interface IService<Entity extends BaseEntity> {
    * @param field Order field
    * @param where where clause
    */
-  readMany(
-    options?: QueryOption<Entity>,
+  readMany<T extends keyof Entity>(
+    options?: QueryOption<Entity> & { dbOptions?: { select?: T[] } },
     manager?: EntityManager
-  ): Promise<IResult<Entity[] | null>>;
-  /**
+  ): Promise<WithCount<Result<Pick<Entity, T>[]>>> /**
    * Create an entity in database
    * @param value Value to create
-   */
+   */;
   create(
     value: QueryDeepPartialEntity<Entity> | QueryDeepPartialEntity<Entity>[],
     manager?: EntityManager
@@ -76,10 +75,10 @@ export abstract class Service<Entity extends BaseEntity>
     );
   }
 
-  async readMany(
-    options?: QueryOption<Entity>,
+  async readMany<T extends keyof Entity>(
+    options?: QueryOption<Entity> & { dbOptions?: { select?: T[] } },
     manager?: EntityManager
-  ): Promise<WithCount<Result<Entity[]>>> {
+  ): Promise<WithCount<Result<Pick<Entity, T>[]>>> {
     const result = await this.dao.readMany(options, manager);
     return new ResultWithCount(
       result.status.error,
