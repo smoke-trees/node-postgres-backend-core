@@ -1,7 +1,12 @@
-import { EntityManager, FindOneOptions, FindOptionsWhere } from "typeorm";
+import {
+  EntityManager,
+  FindOneOptions,
+  FindOptionsSelect,
+  FindOptionsWhere,
+} from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { BaseEntity } from "./BaseEntity";
-import { Dao, QueryOption, _QueryDeepPartialEntity } from "./Dao";
+import { Dao, QueryOption, SelectedRead, _QueryDeepPartialEntity } from "./Dao";
 import { IResult, Result, ResultWithCount, WithCount } from "./result";
 
 export interface IService<Entity extends BaseEntity> {
@@ -12,7 +17,7 @@ export interface IService<Entity extends BaseEntity> {
   readOne(
     id: number | string,
     manager?: EntityManager
-  ): Promise<IResult<Entity>>;
+  ): Promise<IResult<SelectedRead<Entity>>>;
   /**
    * Read Many
    * @param page Page number to get
@@ -21,10 +26,10 @@ export interface IService<Entity extends BaseEntity> {
    * @param field Order field
    * @param where where clause
    */
-  readMany(
-    options?: QueryOption<Entity>,
+  readMany<S extends FindOptionsSelect<Entity> | undefined = undefined>(
+    options?: QueryOption<Entity, S>,
     manager?: EntityManager
-  ): Promise<IResult<Entity[] | null>>;
+  ): Promise<IResult<SelectedRead<Entity, S>[] | null>>;
   /**
    * Create an entity in database
    * @param value Value to create
@@ -63,10 +68,13 @@ export abstract class Service<Entity extends BaseEntity>
     this.dao = dao;
   }
 
-  async readOne(
-    filter: string | number | FindOneOptions<Entity>,
+  async readOne<S extends FindOptionsSelect<Entity> | undefined = undefined>(
+    filter:
+      | string
+      | number
+      | (Omit<FindOneOptions<Entity>, "select"> & { select?: S }),
     manager?: EntityManager
-  ): Promise<Result<Entity | null>> {
+  ): Promise<Result<SelectedRead<Entity, S> | null>> {
     const result = await this.dao.read(filter, manager);
     return new Result(
       result.status.error,
@@ -76,10 +84,10 @@ export abstract class Service<Entity extends BaseEntity>
     );
   }
 
-  async readMany(
-    options?: QueryOption<Entity>,
+  async readMany<S extends FindOptionsSelect<Entity> | undefined = undefined>(
+    options?: QueryOption<Entity, S>,
     manager?: EntityManager
-  ): Promise<WithCount<Result<Entity[]>>> {
+  ): Promise<WithCount<Result<SelectedRead<Entity, S>[]>>> {
     const result = await this.dao.readMany(options, manager);
     return new ResultWithCount(
       result.status.error,
@@ -108,7 +116,7 @@ export abstract class Service<Entity extends BaseEntity>
     values: QueryDeepPartialEntity<Entity>,
     manager?: EntityManager
   ): Promise<Result<number | null>> {
-    let filter: string | number | FindOneOptions<Entity>;
+    let filter: string | number | Omit<FindOneOptions<Entity>, "select">;
     if (typeof id === "string" || typeof id === "number") {
       filter = id;
     } else {

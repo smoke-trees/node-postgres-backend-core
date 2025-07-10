@@ -6,4 +6,8 @@ export class UserDao extends Dao<User> {
   constructor(database: Database) {
     super(database, User, "user");
   }
+
+  async test() {
+    const t = await this.readMany({ select: { name: true } });
+  }
 }
