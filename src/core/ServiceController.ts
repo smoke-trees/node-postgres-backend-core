@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
+import set from "lodash.set";
 import { ParsedQs } from "qs";
+import { FindOptionsWhere } from "typeorm";
 import { BaseEntity, BaseEntityConstructor, createEntity } from "./BaseEntity";
 import { Service } from "./Service";
 import { Application } from "./app";
@@ -120,6 +122,8 @@ export abstract class ServiceController<
       order,
       page,
       count,
+      select,
+      relations,
       nonPaginated,
       fromCreatedDate,
       toCreatedDate,
@@ -177,6 +181,8 @@ export abstract class ServiceController<
       orderBy: orderBy?.toString() as keyof BaseEntity,
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       filter: filter as any,
+      select: this.parseSelect(select?.toString().split(",")),
+      relations: this.parseSelect(relations?.toString().split(",")),
       likeBehaviour: likeBehaviourParse,
       fromCreatedDateDate,
       toCreatedDateDate,
@@ -184,6 +190,16 @@ export abstract class ServiceController<
       like: like as any,
       nonPaginated: nonPaginatedParsed,
     };
+  }
+
+  parseSelect(a?: string[]) {
+    if (!a) {
+      return undefined;
+    }
+    return a.reduce((prev, i) => {
+      set(prev, i, true);
+      return prev;
+    }, {});
   }
 
   async readMany(req: Request, res: Response) {
@@ -195,6 +211,8 @@ export abstract class ServiceController<
       filter,
       fromCreatedDateDate,
       toCreatedDateDate,
+      select,
+      relations,
       like,
       nonPaginated,
       likeBehaviour,
@@ -212,6 +230,8 @@ export abstract class ServiceController<
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       like: like as any,
       nonPaginated,
+      select,
+      relations,
       likeBehaviour,
     });
 
@@ -221,7 +241,13 @@ export abstract class ServiceController<
 
   async readById(req: Request, res: Response) {
     const { id } = req.params;
-    const result = await this.service.readOne(id);
+    const { select, relations } = this.parseReadManyQuery(req.query);
+
+    const result = await this.service.readOne({
+      where: { id: id } as FindOptionsWhere<Entity>,
+      select,
+      relations,
+    });
     res.status(result.getStatus()).json(result);
   }
 
