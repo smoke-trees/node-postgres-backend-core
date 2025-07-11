@@ -75,7 +75,6 @@ export function StLoggerMiddleware(
           res.statusCode !== 404
         ) {
           if (stLoggerDao) {
-            console.log("count ++");
             cbCount++;
             stLoggerDao.create(logValues);
           }

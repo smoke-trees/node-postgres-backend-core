@@ -484,8 +484,6 @@ export class Dao<Entity extends BaseEntity> {
         findOptions["take"] = count;
       }
 
-      console.log(relations, select);
-
       const result = (await repository.find(findOptions)) as SelectedRead<
         Entity,
         S
