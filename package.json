@@ -1,6 +1,6 @@
 {
   "name": "@smoke-trees/postgres-backend",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Postgres Backend Core files",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -52,9 +52,7 @@
     "pg": "^8.11.3",
     "qs": "^6.12.1",
     "typeorm": "0.3.20",
-    "winston": "^3.12.0"
-  },
-  "devDependencies": {
+    "winston": "^3.12.0",
     "@types/chai": "^4.3.14",
     "@types/compression": "^1.7.5",
     "@types/cors": "^2.8.17",
@@ -64,10 +62,12 @@
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
     "c8": "^9.1.0",
     "chai": "^4.4.1",
     "chai-http": "^4.4.0",
-    "cors": "^2.8.5",
     "eslint": "^8.57.0",
     "mocha": "^10.3.0",
     "nodemon": "^3.1.0",
