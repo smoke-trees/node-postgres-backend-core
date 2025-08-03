@@ -75,7 +75,7 @@ Documentation.addInfo({
   version: "1.0.0",
 });
 
-console.log(JSON.stringify(Documentation.getAPIJson(), null, 2));
+// console.log(JSON.stringify(Documentation.getAPIJson(), null, 2));
 
 enableLoggerCircuitBreaker(settings);
 
