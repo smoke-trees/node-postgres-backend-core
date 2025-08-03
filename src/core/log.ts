@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createLogger, format, Logger, transports } from "winston";
 import { ContextProvider } from "@smoke-trees/smoke-context";
+import { createLogger, format, Logger, transports } from "winston";
 
 const contextFormat = format((info) => {
   const context = ContextProvider.getContext();
@@ -55,7 +55,7 @@ const logger = createLogger({
   transports: wTransports,
 });
 
-class CustomLogger {
+export class CustomLogger {
   private _logger: Logger;
 
   public get logger(): Logger {
