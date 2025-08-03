@@ -120,7 +120,7 @@ export class Application extends RouteHandler {
       return res.status(500).json({ status: this.settings.loggerEnable });
     });
 
-    this.app.use("*", (req, res) => {
+    this.app.use("*splat", (req, res) => {
       res.status(404).json({ message: "Not Found" });
     });
   }
