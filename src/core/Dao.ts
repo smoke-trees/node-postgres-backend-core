@@ -30,10 +30,7 @@ export type _QueryDeepPartialEntity<T> = {
     | (() => string);
 };
 
-export interface QueryOption<
-  E,
-  S extends FindOptionsSelect<E> | undefined = undefined,
-> {
+export interface QueryOption<E, S extends FindOptionsSelect<E> | E = E> {
   /**
    * Page number
    */
@@ -87,21 +84,23 @@ export interface QueryOption<
 
 export type ReadManyOption<
   E,
-  S extends FindOptionsSelect<E> | undefined = undefined,
+  S extends FindOptionsSelect<E> | E = E
 > = QueryOption<E, S>;
 
-export type SelectedFields<T, S extends FindOptionsSelect<T> | undefined> =
-  S extends FindOptionsSelect<T>
-    ? {
-        [K in keyof S as S[K] extends true ? K : never]: K extends keyof T
-          ? T[K]
-          : never;
-      }
-    : T;
+export type SelectedFields<
+  T,
+  S extends FindOptionsSelect<T> | T
+> = S extends FindOptionsSelect<T>
+  ? {
+      [K in keyof S as S[K] extends true ? K : never]: K extends keyof T
+        ? T[K]
+        : never;
+    }
+  : T;
 
 export type SelectedRead<
   E,
-  S extends FindOptionsSelect<E> | undefined = undefined,
+  S extends FindOptionsSelect<E> | E = E
 > = S extends undefined ? E : SelectedFields<E, S>;
 
 export type Class<T> =
@@ -172,7 +171,7 @@ export class Dao<Entity extends BaseEntity> {
    * @param manager EntityManager to be used for the operation (optional). Use only for transactions
    * @returns Result with the entity
    */
-  async read<S extends FindOptionsSelect<Entity> | undefined = undefined>(
+  async read<S extends FindOptionsSelect<Entity> | Entity = Entity>(
     value:
       | string
       | number
@@ -188,7 +187,7 @@ export class Dao<Entity extends BaseEntity> {
       if (typeof value === "number" || typeof value === "string") {
         options = { where: { id: value } };
       } else {
-        options = value;
+        options = value as any;
       }
       const result = (await repository.findOne(options)) as SelectedRead<
         Entity,
@@ -435,7 +434,7 @@ export class Dao<Entity extends BaseEntity> {
    * Read a paginated list of entities
    * @returns Result with the list of entities
    */
-  async readMany<S extends FindOptionsSelect<Entity> | undefined = undefined>(
+  async readMany<S extends FindOptionsSelect<Entity> | Entity = Entity>(
     options?: ReadManyOption<Entity, S>,
     manager?: EntityManager
   ): Promise<WithCount<Result<SelectedRead<Entity, S>[]>>> {
@@ -484,10 +483,9 @@ export class Dao<Entity extends BaseEntity> {
         findOptions["take"] = count;
       }
 
-      const result = (await repository.find(findOptions)) as SelectedRead<
-        Entity,
-        S
-      >[];
+      const result = (await repository.find(
+        findOptions as any
+      )) as SelectedRead<Entity, S>[];
       log.debug("Successfully found", `${this.entityName}/readMany`, {
         page,
         count,
