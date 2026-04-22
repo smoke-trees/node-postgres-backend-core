@@ -26,7 +26,7 @@ export interface IService<Entity extends BaseEntity> {
    * @param field Order field
    * @param where where clause
    */
-  readMany<S extends FindOptionsSelect<Entity> | undefined = undefined>(
+  readMany<S extends FindOptionsSelect<Entity> | Entity = Entity>(
     options?: QueryOption<Entity, S>,
     manager?: EntityManager
   ): Promise<IResult<SelectedRead<Entity, S>[] | null>>;
@@ -59,16 +59,16 @@ export interface IService<Entity extends BaseEntity> {
   ): Promise<Result<number | null>>;
 }
 
-export abstract class Service<Entity extends BaseEntity>
-  implements IService<Entity>
-{
+export abstract class Service<
+  Entity extends BaseEntity,
+> implements IService<Entity> {
   dao: Dao<Entity>;
 
   constructor(dao: Dao<Entity>) {
     this.dao = dao;
   }
 
-  async readOne<S extends FindOptionsSelect<Entity> | undefined = undefined>(
+  async readOne<S extends FindOptionsSelect<Entity> | Entity = Entity>(
     filter:
       | string
       | number
@@ -84,7 +84,7 @@ export abstract class Service<Entity extends BaseEntity>
     );
   }
 
-  async readMany<S extends FindOptionsSelect<Entity> | undefined = undefined>(
+  async readMany<S extends FindOptionsSelect<Entity> | Entity = Entity>(
     options?: QueryOption<Entity, S>,
     manager?: EntityManager
   ): Promise<WithCount<Result<SelectedRead<Entity, S>[]>>> {

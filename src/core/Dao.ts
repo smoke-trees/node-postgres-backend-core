@@ -84,23 +84,21 @@ export interface QueryOption<E, S extends FindOptionsSelect<E> | E = E> {
 
 export type ReadManyOption<
   E,
-  S extends FindOptionsSelect<E> | E = E
+  S extends FindOptionsSelect<E> | E = E,
 > = QueryOption<E, S>;
 
-export type SelectedFields<
-  T,
-  S extends FindOptionsSelect<T> | T
-> = S extends FindOptionsSelect<T>
-  ? {
-      [K in keyof S as S[K] extends true ? K : never]: K extends keyof T
-        ? T[K]
-        : never;
-    }
-  : T;
+export type SelectedFields<T, S extends FindOptionsSelect<T> | T> =
+  S extends FindOptionsSelect<T>
+    ? {
+        [K in keyof S as S[K] extends true ? K : never]: K extends keyof T
+          ? T[K]
+          : never;
+      }
+    : T;
 
 export type SelectedRead<
   E,
-  S extends FindOptionsSelect<E> | E = E
+  S extends FindOptionsSelect<E> | E = E,
 > = S extends undefined ? E : SelectedFields<E, S>;
 
 export type Class<T> =
