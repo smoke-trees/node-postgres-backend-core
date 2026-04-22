@@ -86,7 +86,7 @@ export class Application extends RouteHandler {
           page: 1,
           count: 1,
           field: "id",
-          order: "DESC",
+          order: "ASC",
         });
         res.status(healthRead.status.error ? 500 : 209).json({
           message:
