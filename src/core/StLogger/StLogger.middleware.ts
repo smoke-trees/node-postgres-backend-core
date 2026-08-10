@@ -30,6 +30,7 @@ export function enableLoggerCircuitBreaker(
     }, settings.loggerCircuitBreakerTime);
   }
 }
+
 export type StLoggerValues = {
   status: number;
   method: string;
