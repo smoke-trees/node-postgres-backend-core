@@ -1,5 +1,4 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { Validator } from "../../core/Validator";
 import { Documentation } from "../../core/documentation/SmokeDocs";
 import { IUser } from "./IUser";
 import { BaseUser } from "./baseUser";
@@ -16,7 +15,6 @@ export class User extends BaseUser implements IUser {
   id!: number;
 
   @Column("varchar", { name: "name_user", length: 255 })
-  @Validator({ required: true, updatable: true })
   @Documentation.addField({ type: "string", description: "Name of the user" })
   name!: string;
 

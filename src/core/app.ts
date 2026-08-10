@@ -5,7 +5,7 @@ import express, {
 import { Server } from "http";
 import RouteHandler from "./RouteHandler";
 import { StLoggerDao } from "./StLogger/StLogger.dao";
-import { StLoggerMiddleware, cbCount } from "./StLogger/StLogger.middleware";
+import { cbCount } from "./StLogger/StLogger.middleware";
 import { Controller } from "./controller";
 import Database from "./database";
 import log from "./log";
@@ -50,9 +50,6 @@ export class Application extends RouteHandler {
     if (db) {
       this.stLoggerDao = new StLoggerDao(db);
     }
-    this.app.use((req, res, next) =>
-      StLoggerMiddleware(req, res, next, this.stLoggerDao, settings)
-    );
   }
 
   /**

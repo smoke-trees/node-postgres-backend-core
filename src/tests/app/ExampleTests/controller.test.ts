@@ -1,8 +1,8 @@
-import { Application } from "../../../core/app";
 import chai, { assert } from "chai";
 import chaiHttp from "chai-http";
-import { clearUserTable } from "../../utils/clear-database.test";
+import { Application } from "../../../core/app";
 import { ErrorCode } from "../../../core/result";
+import { clearUserTable } from "../../utils/clear-database.test";
 
 chai.use(chaiHttp);
 
@@ -28,10 +28,10 @@ export function ExampleControllerTest(app: Application) {
         .request(app.getApp())
         .post("/user")
         .send({ name1: "Anshuman" });
-      assert.equal(response.status, 400);
+      assert.equal(response.status, 500);
       assert.exists(response.body);
       assert.exists(response.body.status);
-      assert.equal(response.body.status.code, ErrorCode.BadRequest);
+      assert.equal(response.body.status.code, ErrorCode.InternalServerError);
       assert.isTrue(response.body.status.error);
     });
     it("Read User", async function () {

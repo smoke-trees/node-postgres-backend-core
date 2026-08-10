@@ -7,9 +7,9 @@ import {
   MixedList,
 } from "typeorm";
 import { DatabaseLogger } from "./DatabaseLogger";
+import { StLogger } from "./StLogger/StLogger.entity";
 import log from "./log";
 import { Settings } from "./settings";
-import { StLogger } from "./StLogger/StLogger.entity";
 export class Database {
   private _connection!: DataSource;
   public get connection(): DataSource {
@@ -86,7 +86,6 @@ export class Database {
     const config: DataSourceOptions = {
       type: this.settings.databaseType as any,
       port: parseInt(this.settings.dbPort ?? ""),
-      name: this.settings.connectionName,
       database: this.settings.database,
       host: this.settings.dbHost,
       username: this.settings.dbUser,

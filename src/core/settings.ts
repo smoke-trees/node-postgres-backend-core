@@ -1,8 +1,11 @@
 import { config } from "dotenv";
-import { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConnectionOptions";
+import { DataSourceOptions } from "typeorm";
 
 export interface ISettings {
   port: string;
+  /**
+   * @deprecated
+   */
   connectionName: string;
   getValue(key: string, defaultValue?: string): string | undefined;
 }
@@ -27,7 +30,7 @@ export abstract class Settings implements ISettings {
   loggerCircuitBrokenTime: number;
   databaseSettings: Partial<
     Omit<
-      PostgresConnectionOptions,
+      DataSourceOptions,
       | "username"
       | "password"
       | "port"
@@ -38,7 +41,6 @@ export abstract class Settings implements ISettings {
       | "migrations"
       | "synchronize"
       | "migrationsRun"
-      | "name"
     >
   >;
 
