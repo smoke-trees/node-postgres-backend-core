@@ -22,7 +22,7 @@ export class Application extends RouteHandler {
   protected mw: RequestHandler[];
   public settings: Settings;
   public database: Database | null;
-  protected readonly stLoggerDao?: StLoggerDao;
+  public readonly stLoggerDao?: StLoggerDao;
 
   /**
    * Creates a Application which can run as a server
