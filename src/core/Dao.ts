@@ -71,7 +71,7 @@ export interface QueryOption<E, S extends FindOptionsSelect<E> | E = E> {
   /**
    * Database options
    */
-  dbOptions?: FindManyOptions<E>;
+  dbOptions?: Omit<FindManyOptions<E>, "select"> & { select?: S };
 
   select?: S;
 
@@ -473,7 +473,7 @@ export class Dao<Entity extends BaseEntity> {
         where: parsedWhere,
         order: orderValue,
         ...dbOptions,
-        select: select,
+        ...(select ? { select } : {}),
         relations: relations,
       };
       if (!nonPaginated) {
