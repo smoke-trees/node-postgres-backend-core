@@ -31,7 +31,7 @@ export function Validator(options?: ValidatorOptions) {
   const required = options?.required ?? false;
   const updatable = options?.updatable ?? true;
 
-  /* eslint-disable-next-line @typescript-eslint/ban-types */
+  /* eslint-disable-next-line @typescript-eslint/no-wrapper-object-types */
   return function (target: Object, propertyKey: string | symbol) {
     Reflect.defineMetadata(
       `smoke:${propertyKey.toString()}:validator`,
